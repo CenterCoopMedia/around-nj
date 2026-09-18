@@ -1,5 +1,7 @@
 """Story link validation, URL dedupe, and partner matching."""
 
+from datetime import datetime, timedelta, timezone
+
 from build_around_nj_demo import (
     canonical_url,
     combine_duplicate,
@@ -33,10 +35,13 @@ def test_canonical_url_keeps_identity_query_and_drops_tracking():
 
 
 def test_relative_rss_link_is_resolved(monkeypatch):
+    published = (datetime.now(timezone.utc) - timedelta(hours=2)).strftime(
+        "%a, %d %b %Y %H:%M:%S GMT"
+    )
     rss = (
         b'<?xml version="1.0"?><rss version="2.0"><channel><title>x</title>'
         b"<item><title>Hello</title><link>/story</link>"
-        b"<pubDate>Fri, 18 Sep 2026 12:00:00 GMT</pubDate></item></channel></rss>"
+        b"<pubDate>" + published.encode() + b"</pubDate></item></channel></rss>"
     )
     monkeypatch.setattr(
         "build_around_nj_demo.fetch_url_bytes", lambda url, **kwargs: (200, rss)

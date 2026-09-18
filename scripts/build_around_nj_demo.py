@@ -348,19 +348,12 @@ def fetch_feed_bounded(url: str, source: str, partner: bool = False) -> dict:
     )
     proc.start()
     child.close()
-    proc.join(timeout=DEADLINE_SECONDS + 2)
-    if proc.is_alive():
-        proc.terminate()
+    if parent.poll(timeout=DEADLINE_SECONDS + 2):
+        result = parent.recv()
         proc.join(1)
-        return {
-            "source": source,
-            "url": url,
-            "ok": False,
-            "items": [],
-            "error": "deadline",
-        }
-    if parent.poll():
-        return parent.recv()
+        return result
+    proc.terminate()
+    proc.join(1)
     return {
         "source": source,
         "url": url,
@@ -536,7 +529,8 @@ def main() -> None:
                 if not link or not title:
                     continue
                 when = parse_when({"published": item.get("published")})
-                if when is None or when < cutoff:
+                future_limit = datetime.now(timezone.utc) + timedelta(hours=1)
+                if when is None or when < cutoff or when > future_limit:
                     continue
                 stories.append(
                     {
