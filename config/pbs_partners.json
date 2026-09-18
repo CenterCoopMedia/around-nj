@@ -268,8 +268,9 @@
     "invite": "CGNet Swara",
     "home": "https://cgnetswara.org",
     "kind": "other",
-    "rss": "https://cgnetswara.org/podcast.php",
-    "star_domain": null
+    "rss": null,
+    "star_domain": null,
+    "snapshot": false
   },
   {
     "org": "New Jersey Dental Association",

@@ -34,7 +34,7 @@ See `docs/around-nj-demo.md`.
 
 ## Daily News Roundup newsletter
 
-The same `src/` pipeline still produces the CCM Mailchimp newsletter (Monday through Thursday). That path is unchanged:
+The same `src/` pipeline still produces the Center for Cooperative Media Mailchimp newsletter (Monday through Thursday). That path is unchanged:
 
 ```bash
 python src/workflow.py

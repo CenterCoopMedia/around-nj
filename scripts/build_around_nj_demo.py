@@ -5,15 +5,18 @@ from __future__ import annotations
 
 import argparse
 import html
+import ipaddress
 import json
 import re
+import socket
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
-from urllib.parse import urlparse
+from urllib.parse import urljoin, urlparse
+from zoneinfo import ZoneInfo
 
 import feedparser
 import requests
@@ -28,7 +31,52 @@ DEADLINE_SECONDS = 15
 MAX_BODY_BYTES = 2_000_000
 UA = "CCM-AroundNJ/0.3 (+https://centerforcooperativemedia.org)"
 MAX_LIST = 80
+MAX_REDIRECTS = 3
+NJ_TZ = ZoneInfo("America/New_York")
 EXPECTED_FAILURE_PREFIXES = ("http 403",)
+
+
+def is_public_http_url(url: str) -> bool:
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https") or not parsed.hostname:
+        return False
+    host = parsed.hostname
+    if host in {"localhost", "localhost.localdomain"}:
+        return False
+    try:
+        infos = socket.getaddrinfo(host, None)
+    except socket.gaierror:
+        return False
+    for info in infos:
+        ip = ipaddress.ip_address(info[4][0])
+        if (
+            ip.is_private
+            or ip.is_loopback
+            or ip.is_link_local
+            or ip.is_reserved
+            or ip.is_multicast
+        ):
+            return False
+    return True
+
+
+def open_public_feed(session: requests.Session, url: str) -> requests.Response:
+    current = url
+    for _ in range(MAX_REDIRECTS + 1):
+        if not is_public_http_url(current):
+            raise ValueError("blocked host")
+        response = session.get(
+            current, timeout=TIMEOUT, allow_redirects=False, stream=True
+        )
+        if response.is_redirect or response.status_code in {301, 302, 303, 307, 308}:
+            location = response.headers.get("Location")
+            response.close()
+            if not location:
+                raise ValueError("redirect without location")
+            current = urljoin(current, location)
+            continue
+        return response
+    raise ValueError("too many redirects")
 
 
 def domain(url: str | None) -> str:
@@ -79,9 +127,7 @@ def read_bounded_body(response: requests.Response) -> bytes:
 def fetch_feed(session: requests.Session, url: str, source: str) -> dict:
     result = {"source": source, "url": url, "ok": False, "items": [], "error": None}
     try:
-        with session.get(
-            url, timeout=TIMEOUT, allow_redirects=True, stream=True
-        ) as response:
+        with open_public_feed(session, url) as response:
             if response.status_code >= 400:
                 result["error"] = f"http {response.status_code}"
                 return result
@@ -124,17 +170,19 @@ def fmt_when(iso: str | None) -> str:
     if not iso:
         return ""
     try:
-        dt = datetime.fromisoformat(iso).astimezone()
+        dt = datetime.fromisoformat(iso).astimezone(NJ_TZ)
         hour = dt.strftime("%I").lstrip("0") or "12"
-        return f"{dt.strftime('%a')} {hour}:{dt.strftime('%M %p')}"
+        return f"{dt.strftime('%a')} {hour}:{dt.strftime('%M %p')} ET"
     except Exception:
         return iso[:16]
 
 
 def fmt_now(dt: datetime) -> str:
-    hour = dt.strftime("%I").lstrip("0") or "12"
+    local = dt.astimezone(NJ_TZ)
+    hour = local.strftime("%I").lstrip("0") or "12"
     return (
-        f"{dt.strftime('%A, %B')} {dt.day}, {dt.year}, {hour}:{dt.strftime('%M %p %Z')}"
+        f"{local.strftime('%A, %B')} {local.day}, {local.year}, "
+        f"{hour}:{local.strftime('%M %p')} ET"
     )
 
 
@@ -173,9 +221,15 @@ def main() -> None:
     )
     args = parser.parse_args()
 
-    feeds_cfg = json.loads((ROOT / "config" / "rss_feeds.json").read_text())
-    partners = json.loads((ROOT / "config" / "pbs_partners.json").read_text())
-    template = (ROOT / "scripts" / "around_nj_template.html").read_text()
+    feeds_cfg = json.loads(
+        (ROOT / "config" / "rss_feeds.json").read_text(encoding="utf-8")
+    )
+    partners = json.loads(
+        (ROOT / "config" / "pbs_partners.json").read_text(encoding="utf-8")
+    )
+    template = (ROOT / "scripts" / "around_nj_template.html").read_text(
+        encoding="utf-8"
+    )
 
     dnr_feeds = []
     for items in feeds_cfg.get("feeds", {}).values():
@@ -194,6 +248,8 @@ def main() -> None:
     seen = {url for url, _ in jobs}
     for partner in partners:
         rss = partner.get("rss")
+        if partner.get("snapshot") is False:
+            continue
         if rss and rss not in seen:
             jobs.append((rss, partner["org"]))
             seen.add(rss)
@@ -299,7 +355,7 @@ def main() -> None:
     )
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(html_out)
+    out.write_text(html_out, encoding="utf-8")
     print(f"wrote {out} partner={len(partner_stories)} other={len(other_stories)}")
 
 
