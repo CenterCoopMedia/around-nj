@@ -4,16 +4,27 @@ description: Automate Around New Jersey (NJ PBS) collection and the Daily News R
 allowed-tools: Bash, Read, Glob, Grep
 ---
 
-# DNR Newsletter Automation
+# Around New Jersey and DNR automation
 
 ## When to Activate
 
 Activate this skill when:
+- User wants the NJ PBS Around New Jersey snapshot or partner-starred feed
 - User wants to run the DNR newsletter pipeline
 - User mentions "create newsletter", "run DNR", or "generate preview"
 - Troubleshooting pipeline issues
 - Testing story collection or classification
 - Checking story counts or feed connectivity
+
+## Around New Jersey snapshot
+
+This does **not** create a Mailchimp draft. It writes branded HTML only.
+
+```bash
+python scripts/build_around_nj_demo.py --output drafts/around-nj-demo.html
+```
+
+Publish by copying that file to `index.html` on the `gh-pages` branch. Live URL: https://centercoopmedia.github.io/around-nj/
 
 ## Core Concepts
 
@@ -95,6 +106,13 @@ venv/Scripts/python.exe src/test_connections.py
 - Use feedback loop in Step 6 to move stories
 
 ## Examples
+
+**Input**: "Refresh the Around New Jersey demo"
+
+**Output**: Snapshot only, no Mailchimp:
+```bash
+python scripts/build_around_nj_demo.py --output drafts/around-nj-demo.html
+```
 
 **Input**: "Run the newsletter"
 

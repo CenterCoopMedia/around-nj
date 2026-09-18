@@ -7,6 +7,8 @@ import argparse
 import html
 import json
 import re
+import sys
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
@@ -17,15 +19,16 @@ import feedparser
 import requests
 
 ROOT = Path(__file__).resolve().parents[1]
-import sys
-
 sys.path.insert(0, str(ROOT / "src"))
 from rss_fetcher import is_generic_broadcast  # noqa: E402
 
 LOOKBACK_HOURS = 72
 TIMEOUT = 10
-UA = "CCM-DNR-demo/0.2 (+https://centerforcooperativemedia.org)"
+DEADLINE_SECONDS = 15
+MAX_BODY_BYTES = 2_000_000
+UA = "CCM-AroundNJ/0.3 (+https://centerforcooperativemedia.org)"
 MAX_LIST = 80
+EXPECTED_FAILURE_PREFIXES = ("http 403",)
 
 
 def domain(url: str | None) -> str:
@@ -59,14 +62,31 @@ def parse_when(entry) -> datetime | None:
     return None
 
 
+def read_bounded_body(response: requests.Response) -> bytes:
+    started = time.monotonic()
+    chunks: list[bytes] = []
+    size = 0
+    for chunk in response.iter_content(65536):
+        if time.monotonic() - started > DEADLINE_SECONDS:
+            raise TimeoutError("deadline")
+        size += len(chunk)
+        if size > MAX_BODY_BYTES:
+            raise ValueError("too large")
+        chunks.append(chunk)
+    return b"".join(chunks)
+
+
 def fetch_feed(session: requests.Session, url: str, source: str) -> dict:
     result = {"source": source, "url": url, "ok": False, "items": [], "error": None}
     try:
-        response = session.get(url, timeout=TIMEOUT, allow_redirects=True)
-        if response.status_code >= 400:
-            result["error"] = f"http {response.status_code}"
-            return result
-        parsed = feedparser.parse(response.content)
+        with session.get(
+            url, timeout=TIMEOUT, allow_redirects=True, stream=True
+        ) as response:
+            if response.status_code >= 400:
+                result["error"] = f"http {response.status_code}"
+                return result
+            body = read_bounded_body(response)
+        parsed = feedparser.parse(body)
         if parsed.bozo and not parsed.entries:
             result["error"] = "not a feed"
             return result
@@ -196,9 +216,21 @@ def main() -> None:
             else:
                 failures.append(result)
     if failures:
+        expected = [
+            f
+            for f in failures
+            if str(f.get("error") or "").startswith(EXPECTED_FAILURE_PREFIXES)
+        ]
+        unexpected = [f for f in failures if f not in expected]
         print(f"feed failures: {len(failures)}/{len(jobs)}")
-        for failure in failures[:12]:
-            print(f"  {failure['source']}: {failure['error']}")
+        if expected:
+            print(f"  expected: {len(expected)}")
+            for failure in expected:
+                print(f"    {failure['source']}: {failure['error']}")
+        if unexpected:
+            print(f"  unexpected: {len(unexpected)}")
+            for failure in unexpected:
+                print(f"    {failure['source']}: {failure['error']}")
     if failures and len(failures) * 2 >= len(jobs):
         raise SystemExit("too many feed failures to publish a snapshot")
     if not stories:
