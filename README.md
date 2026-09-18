@@ -17,7 +17,9 @@ From this branch, run `python -m http.server 8000` and open `http://localhost:80
 
 Merge the review branch into `gh-pages`, not `master`, to update the existing Pages publication. No deployment is performed by the test workflow.
 
-To refresh the demo later, replace **`snapshot.html`**, not the new `index.html`. Keep `.meta` (capture date), `.stat b/span` (original collection totals), `ul.stories > li` with its `.is-partner` class, anchor, `.src`, and `.when`, plus the four-column partner table (organization, type, RSS, website). Review count changes and run the checks before publishing. There is no live feed refresh in this change.
+To refresh headlines, replace **`snapshot.html`**, not `index.html`. Keep `.meta` (capture date), `.stat b/span` (original collection totals), `ul.stories > li` with its `.is-partner` class, anchor, `.src`, and `.when`, plus the four-column partner table (organization, type, RSS, website).
+
+Twice-daily publishes that only change `snapshot.html` do not run this workflow. Desk, CSS, or test changes still run the checks.
 
 ## Data and editorial limits
 
