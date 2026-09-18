@@ -17,6 +17,11 @@ import feedparser
 import requests
 
 ROOT = Path(__file__).resolve().parents[1]
+import sys
+
+sys.path.insert(0, str(ROOT / "src"))
+from rss_fetcher import is_generic_broadcast  # noqa: E402
+
 LOOKBACK_HOURS = 72
 TIMEOUT = 10
 UA = "CCM-DNR-demo/0.2 (+https://centerforcooperativemedia.org)"
@@ -67,7 +72,7 @@ def fetch_feed(session: requests.Session, url: str, source: str) -> dict:
         for entry in parsed.entries:
             title = re.sub(r"\s+", " ", (entry.get("title") or "").strip())
             link = (entry.get("link") or "").strip()
-            if not title or not link:
+            if not title or not link or is_generic_broadcast(title):
                 continue
             if urlparse(link).scheme not in ("http", "https"):
                 continue
@@ -153,8 +158,11 @@ def main() -> None:
             url = feed.get("rss_nj") or feed.get("rss_url")
             if not url:
                 continue
-            if (feed.get("coverage") or "").lower() == "nyc metro":
-                continue
+            coverage = (feed.get("coverage") or "").lower()
+            if coverage in {"nyc metro", "philadelphia", "philadelphia/south jersey"}:
+                # WHYY still included via rss_nj below when present.
+                if not feed.get("rss_nj"):
+                    continue
             dnr_feeds.append({**feed, "rss_url": url})
 
     jobs = [(f["rss_url"], f["name"]) for f in dnr_feeds]
