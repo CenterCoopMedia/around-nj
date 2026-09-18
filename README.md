@@ -1,8 +1,8 @@
 # Daily News Roundup (DNR)
 
-Automated newsletter production system for the **Daily News Roundup**, a Mailchimp newsletter produced by the [Center for Cooperative Media](https://centerforcooperativemedia.org) at Montclair State University.
+Automated newsletter production for the Daily News Roundup, a Mailchimp newsletter from the [Center for Cooperative Media](https://centerforcooperativemedia.org) at Montclair State University.
 
-The newsletter aggregates and curates New Jersey journalism news for distribution to the NJ News Commons network (~3,000 subscribers).
+The newsletter aggregates New Jersey journalism for the NJ News Commons network. The same feed list now also powers an [Around New Jersey](https://centercoopmedia.github.io/dnr/) demo for NJ PBS: headlines from statewide sources, with News Commons partners marked.
 
 ## Features
 
@@ -26,6 +26,35 @@ The newsletter aggregates and curates New Jersey journalism news for distributio
 | Health + safety | Healthcare, public health, hospitals |
 | Climate + environment | Offshore wind, clean energy, PFAS, DEP actions |
 | Lastly | Arts, sports, restaurants, human interest |
+
+## Around New Jersey demo
+
+Live snapshot: https://centercoopmedia.github.io/dnr/
+
+NJ PBS asked for a browsable daily view of what News Commons partners are reporting, for an Around New Jersey segment. The GitHub Pages demo uses official NJ PBS marks (white-and-blue logo on navy, PBS Sans, PBS blue). It is a 72-hour RSS snapshot, not a live product.
+
+- Partners only: filter control on the page
+- TAPinto town feeds currently return HTTP 403
+- USA Today network RSS URLs in `config/rss_feeds.json` currently return 404
+
+See `docs/around-nj-demo.md`.
+
+## Continuous integration
+
+Pull requests and pushes to `master` run GitHub Actions:
+
+- `ruff check` and `ruff format --check`
+- `pytest` (offline RSS filters)
+- gitleaks secret scan
+- a `CI gate` job that must pass
+
+`master` requires a pull request, the `CI gate` check, and resolved review threads (including for admins).
+
+```bash
+ruff check src tests
+ruff format --check src tests
+pytest -q
+```
 
 ## Installation
 
@@ -156,8 +185,10 @@ dnr/
 ├── history/
 │   ├── dnr-template.html    # Mailchimp HTML template
 │   └── *.csv                # Historical newsletter data
+├── .github/workflows/ci.yml # Ruff, pytest, gitleaks, CI gate
 ├── docs/
-│   └── STYLE_GUIDE.md       # Story selection criteria
+│   ├── STYLE_GUIDE.md       # Story selection criteria
+│   └── around-nj-demo.md    # NJ PBS Around New Jersey snapshot
 ├── drafts/                  # Generated HTML previews
 ├── DNR_Standard.bat         # Quick launch (standard)
 ├── DNR_Full.bat             # Quick launch (with Playwright)

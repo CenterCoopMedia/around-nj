@@ -6,6 +6,7 @@ Automated newsletter production system for the Daily News Roundup, a Mailchimp n
 
 **Schedule:** Monday through Thursday mornings
 **Repo:** https://github.com/CenterCoopMedia/dnr
+**Around New Jersey demo:** https://centercoopmedia.github.io/dnr/
 
 ## Quick start
 
@@ -100,12 +101,24 @@ MAILCHIMP_LIST_ID=
 GEMINI_API_KEY=  # Optional, for URL enrichment
 ```
 
+## Local checks
+
+```bash
+ruff check src tests
+ruff format --check src tests
+pytest -q
+```
+
+GitHub Actions runs the same checks plus gitleaks. `master` requires the `CI gate` check and resolved review threads.
+
 ## Important files
 
 - `config/rss_feeds.json` - RSS feed configuration (75+ sources)
 - `history/dnr-template.html` - Mailchimp HTML template
 - `docs/STYLE_GUIDE.md` - Story selection criteria for each section
+- `docs/around-nj-demo.md` - NJ PBS Around New Jersey snapshot
 - `drafts/` - Generated HTML previews
+- `.github/workflows/ci.yml` - Ruff, pytest, gitleaks, CI gate
 
 ## Editorial rules
 

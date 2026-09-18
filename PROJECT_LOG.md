@@ -10,6 +10,14 @@ Automation system for the Daily News Roundup Mailchimp newsletter produced by th
 
 ## Session history
 
+### 2026-09-18 - NJ PBS Around New Jersey demo and CI
+
+- Pulled Stefanie's invitation Airtable and the DNR/NJ News Commons base.
+- Published a headlines-only GitHub Pages snapshot at https://centercoopmedia.github.io/dnr/ and branded it with official NJ PBS marks (white-and-blue logo on navy, PBS Sans).
+- Added Python CI: ruff check, ruff format, pytest, gitleaks, `CI gate`.
+- Protected `master`: require a pull request, conversation resolution (including admins), and the `CI gate` check.
+- TAPinto RSS is 403. Several USA Today network feed URLs return 404.
+
 ### 2025-12-16 - Project initialization, full pipeline implementation
 
 **Setup completed:**
