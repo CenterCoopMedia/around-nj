@@ -647,7 +647,7 @@ def run_workflow(
 
     try:
         # Import optional modules
-        if include_playwright and find_spec("playwright_fetcher") is None:
+        if include_playwright and find_spec("playwright") is None:
             print("  Warning: Playwright not available")
             include_playwright = False
 
