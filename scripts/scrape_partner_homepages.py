@@ -173,6 +173,8 @@ def main() -> None:
     tmp.write_text(json.dumps(payload, indent=2), encoding="utf-8")
     tmp.replace(out)
     print(f"wrote {out}")
+    if targets and not any(block.get("ok") for block in results):
+        raise SystemExit("every configured scrape failed")
 
 
 if __name__ == "__main__":

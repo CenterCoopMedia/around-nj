@@ -28,7 +28,7 @@ set +e
 scrape_status=$?
 set -e
 BUILD_ARGS=(--output "$SNAPSHOT")
-if [ -f "$SCRAPED" ]; then
+if [ "$scrape_status" -eq 0 ] && [ -f "$SCRAPED" ]; then
   BUILD_ARGS+=(--scraped-json "$SCRAPED")
 fi
 "$PYTHON" "${ROOT}/scripts/build_around_nj_demo.py" "${BUILD_ARGS[@]}"

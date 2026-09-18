@@ -36,7 +36,7 @@ python scripts/build_around_nj_demo.py \
   --output drafts/snapshot.html
 ```
 
-Twice-daily timer (6:30am and 2:00pm Eastern): `deploy/systemd/around-nj-refresh.timer`. It builds locally. Set `AROUND_NJ_PUBLISH=1` on the service to copy `snapshot.html` onto the `gh-pages` worktree.
+Twice-daily timer (6:30am and 2:00pm Eastern): `deploy/systemd/around-nj-refresh.timer`. It builds locally. Set `AROUND_NJ_PUBLISH=1` on the service to copy `snapshot.html` onto the `gh-pages` worktree. Do not overwrite `index.html`; that file is the news desk. The desk reads `snapshot.html` for headlines.
 
 ## Rebuild
 
@@ -51,8 +51,8 @@ That command reads `config/rss_feeds.json` and `config/pbs_partners.json`, fetch
 Publish to GitHub Pages from a `gh-pages` checkout that already has `brand/` (official NJ PBS logo and PBS Sans):
 
 ```bash
-cp drafts/around-nj-demo.html /path/to/gh-pages/index.html
-git -C /path/to/gh-pages add index.html
+cp drafts/snapshot.html /path/to/gh-pages/snapshot.html
+git -C /path/to/gh-pages add snapshot.html
 git -C /path/to/gh-pages commit -m "Refresh Around New Jersey snapshot."
 git -C /path/to/gh-pages push origin gh-pages
 ```
