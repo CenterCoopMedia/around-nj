@@ -37,9 +37,21 @@ NJ_TZ = ZoneInfo("America/New_York")
 EXPECTED_FAILURE_PREFIXES = ("http 403",)
 
 
+TOKEN_RE = re.compile(r"\{\{[A-Z_]+\}\}")
+
+
 def ip_is_allowed(ip: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
     """Allow only globally routed unicast addresses. This excludes Tailscale CGNAT."""
-    return bool(ip.is_global)
+    return bool(ip.is_global) and not ip.is_multicast
+
+
+def render_template(template: str, mapping: dict[str, str]) -> str:
+    """Replace {{TOKENS}} in the template only. Values are not rescanned."""
+
+    def repl(match: re.Match[str]) -> str:
+        return mapping.get(match.group(0), match.group(0))
+
+    return TOKEN_RE.sub(repl, template)
 
 
 def pinned_addrinfo(host: str, port: int):
@@ -339,24 +351,21 @@ def main() -> None:
             "</tr>"
         )
 
-    html_out = (
-        template.replace("{{NOW}}", html.escape(now))
-        .replace("{{PARTNER_COUNT}}", str(len(partner_stories)))
-        .replace("{{OTHER_COUNT}}", str(len(other_stories)))
-        .replace("{{PARTNER_SHOWN}}", str(len(shown_partners)))
-        .replace("{{OTHER_SHOWN}}", str(len(shown_other)))
-        .replace("{{PARTNER_RSS_COUNT}}", str(len(working_partners)))
-        .replace("{{PARTNER_TOTAL}}", str(len(partners)))
-        .replace("{{DNR_FEED_COUNT}}", str(len(dnr_feeds)))
-        .replace(
-            "{{PARTNER_ITEMS}}",
-            "\n".join(story_li(s, True) for s in shown_partners),
-        )
-        .replace(
-            "{{OTHER_ITEMS}}",
-            "\n".join(story_li(s, False) for s in shown_other),
-        )
-        .replace("{{COVERAGE_ROWS}}", "".join(rows))
+    html_out = render_template(
+        template,
+        {
+            "{{NOW}}": html.escape(now),
+            "{{PARTNER_COUNT}}": str(len(partner_stories)),
+            "{{OTHER_COUNT}}": str(len(other_stories)),
+            "{{PARTNER_SHOWN}}": str(len(shown_partners)),
+            "{{OTHER_SHOWN}}": str(len(shown_other)),
+            "{{PARTNER_RSS_COUNT}}": str(len(working_partners)),
+            "{{PARTNER_TOTAL}}": str(len(partners)),
+            "{{DNR_FEED_COUNT}}": str(len(dnr_feeds)),
+            "{{PARTNER_ITEMS}}": "\n".join(story_li(s, True) for s in shown_partners),
+            "{{OTHER_ITEMS}}": "\n".join(story_li(s, False) for s in shown_other),
+            "{{COVERAGE_ROWS}}": "".join(rows),
+        },
     )
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)

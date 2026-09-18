@@ -19,3 +19,8 @@ def test_tailscale_cgnat_is_blocked():
 def test_public_unicast_is_allowed():
     assert ip_is_allowed(ipaddress.ip_address("1.1.1.1"))
     assert ip_is_allowed(ipaddress.ip_address("8.8.8.8"))
+
+
+def test_multicast_is_blocked():
+    assert not ip_is_allowed(ipaddress.ip_address("224.0.0.1"))
+    assert not ip_is_allowed(ipaddress.ip_address("ff02::1"))
