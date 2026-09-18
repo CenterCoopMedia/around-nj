@@ -5,35 +5,33 @@ import sys
 from dotenv import load_dotenv
 
 # Fix Windows console encoding
-if sys.platform == 'win32':
-    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 # Load environment variables
 load_dotenv()
 
+
 def test_airtable():
     """Test Airtable connection and fetch recent submissions."""
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("TESTING AIRTABLE CONNECTION")
-    print("="*50)
+    print("=" * 50)
 
     try:
         from pyairtable import Api
 
         api = Api(os.getenv("AIRTABLE_PAT"))
-        table = api.table(
-            os.getenv("AIRTABLE_BASE_ID"),
-            os.getenv("AIRTABLE_TABLE_ID")
-        )
+        table = api.table(os.getenv("AIRTABLE_BASE_ID"), os.getenv("AIRTABLE_TABLE_ID"))
 
         # Fetch recent records
         records = table.all(max_records=5)
-        print(f"✅ Airtable connected successfully!")
+        print("✅ Airtable connected successfully!")
         print(f"   Found {len(records)} recent submissions")
 
         if records:
             print("\n   Latest submission:")
-            latest = records[0]['fields']
+            latest = records[0]["fields"]
             for key, value in latest.items():
                 # Truncate long values
                 display_val = str(value)[:60] + "..." if len(str(value)) > 60 else value
@@ -47,19 +45,21 @@ def test_airtable():
 
 def test_mailchimp():
     """Test Mailchimp connection and fetch account info."""
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("TESTING MAILCHIMP CONNECTION")
-    print("="*50)
+    print("=" * 50)
 
     try:
         import mailchimp_marketing as MailchimpMarketing
         from mailchimp_marketing.api_client import ApiClientError
 
         client = MailchimpMarketing.Client()
-        client.set_config({
-            "api_key": os.getenv("MAILCHIMP_API_KEY"),
-            "server": os.getenv("MAILCHIMP_SERVER_PREFIX")
-        })
+        client.set_config(
+            {
+                "api_key": os.getenv("MAILCHIMP_API_KEY"),
+                "server": os.getenv("MAILCHIMP_SERVER_PREFIX"),
+            }
+        )
 
         # Test connection with ping
         response = client.ping.get()
@@ -76,7 +76,7 @@ def test_mailchimp():
             try:
                 template = client.templates.get_template(template_id)
                 print(f"   Template '{template.get('name')}' accessible ✓")
-            except:
+            except Exception:
                 print(f"   ⚠️  Could not access template {template_id}")
 
         # Check list access
@@ -84,8 +84,10 @@ def test_mailchimp():
         if list_id:
             try:
                 audience = client.lists.get_list(list_id)
-                print(f"   Audience '{audience.get('name')}' has {audience.get('stats', {}).get('member_count', 'N/A')} subscribers")
-            except:
+                print(
+                    f"   Audience '{audience.get('name')}' has {audience.get('stats', {}).get('member_count', 'N/A')} subscribers"
+                )
+            except Exception:
                 print(f"   ⚠️  Could not access list {list_id}")
 
         return True
@@ -99,9 +101,9 @@ def test_mailchimp():
 
 def test_anthropic():
     """Test Anthropic API connection."""
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("TESTING ANTHROPIC (CLAUDE) CONNECTION")
-    print("="*50)
+    print("=" * 50)
 
     try:
         import anthropic
@@ -113,12 +115,15 @@ def test_anthropic():
             model="claude-3-haiku-20240307",
             max_tokens=50,
             messages=[
-                {"role": "user", "content": "Say 'API connection successful' and nothing else."}
-            ]
+                {
+                    "role": "user",
+                    "content": "Say 'API connection successful' and nothing else.",
+                }
+            ],
         )
 
         response_text = message.content[0].text
-        print(f"✅ Anthropic connected successfully!")
+        print("✅ Anthropic connected successfully!")
         print(f"   Model response: {response_text}")
         print(f"   Input tokens: {message.usage.input_tokens}")
         print(f"   Output tokens: {message.usage.output_tokens}")
@@ -130,19 +135,19 @@ def test_anthropic():
 
 
 def main():
-    print("\n" + "#"*50)
+    print("\n" + "#" * 50)
     print("# DNR AUTOMATION - CONNECTION TEST")
-    print("#"*50)
+    print("#" * 50)
 
     results = {
         "Airtable": test_airtable(),
         "Mailchimp": test_mailchimp(),
-        "Anthropic": test_anthropic()
+        "Anthropic": test_anthropic(),
     }
 
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("SUMMARY")
-    print("="*50)
+    print("=" * 50)
 
     all_passed = True
     for service, passed in results.items():

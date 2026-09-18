@@ -24,34 +24,36 @@ from typing import Optional
 
 from dotenv import load_dotenv
 
-# Fix Windows encoding
-if sys.platform == 'win32':
-    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+from airtable_fetcher import SECTION_MAP, fetch_submissions
+from classifier import SECTIONS, classify_stories_batch, filter_top_stories
+from html_formatter import build_newsletter, count_stories
+from rss_fetcher import fetch_all_feeds
+
+try:
+    from playwright_fetcher import fetch_all_playwright_sources
+
+    PLAYWRIGHT_AVAILABLE = True
+except ImportError:
+    fetch_all_playwright_sources = None
+    PLAYWRIGHT_AVAILABLE = False
+
+try:
+    from url_enricher import enrich_stories_batch
+
+    ENRICHMENT_AVAILABLE = True
+except ImportError:
+    enrich_stories_batch = None
+    ENRICHMENT_AVAILABLE = False
+
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 load_dotenv()
 
-# Import our modules
-from airtable_fetcher import fetch_submissions, SECTION_MAP
-from classifier import classify_stories_batch, SECTIONS, filter_top_stories
-from html_formatter import build_newsletter, preview_newsletter, count_stories
-from rss_fetcher import fetch_all_feeds
 
-# Optional Playwright import (for sites with broken RSS)
-try:
-    from playwright_fetcher import fetch_all_playwright_sources
-    PLAYWRIGHT_AVAILABLE = True
-except ImportError:
-    PLAYWRIGHT_AVAILABLE = False
-
-# Optional URL enrichment via Gemini
-try:
-    from url_enricher import enrich_stories_batch
-    ENRICHMENT_AVAILABLE = True
-except ImportError:
-    ENRICHMENT_AVAILABLE = False
-
-
-def fetch_all_stories(hours_back: int = 24, include_playwright: bool = False) -> list[dict]:
+def fetch_all_stories(
+    hours_back: int = 24, include_playwright: bool = False
+) -> list[dict]:
     """
     Fetch stories from all sources (RSS + Airtable + optionally Playwright).
 
@@ -158,7 +160,9 @@ def deduplicate_stories(stories: list[dict]) -> list[dict]:
     return unique
 
 
-def organize_by_section(stories: list[dict], max_top_stories: int = 6) -> dict[str, list[dict]]:
+def organize_by_section(
+    stories: list[dict], max_top_stories: int = 6
+) -> dict[str, list[dict]]:
     """
     Organize stories by section.
 
@@ -200,15 +204,28 @@ def organize_by_section(stories: list[dict], max_top_stories: int = 6) -> dict[s
         for story in overflow:
             # Try to find a better section based on keywords
             headline = story.get("headline", story.get("title", "")).lower()
-            if any(kw in headline for kw in ["governor", "legislature", "election", "court"]):
+            if any(
+                kw in headline
+                for kw in ["governor", "legislature", "election", "court"]
+            ):
                 sections["politics"].append(story)
-            elif any(kw in headline for kw in ["housing", "rent", "development", "zoning"]):
+            elif any(
+                kw in headline for kw in ["housing", "rent", "development", "zoning"]
+            ):
                 sections["housing"].append(story)
-            elif any(kw in headline for kw in ["school", "education", "university", "teacher"]):
+            elif any(
+                kw in headline
+                for kw in ["school", "education", "university", "teacher"]
+            ):
                 sections["education"].append(story)
-            elif any(kw in headline for kw in ["health", "hospital", "covid", "medical"]):
+            elif any(
+                kw in headline for kw in ["health", "hospital", "covid", "medical"]
+            ):
                 sections["health"].append(story)
-            elif any(kw in headline for kw in ["climate", "environment", "energy", "pollution"]):
+            elif any(
+                kw in headline
+                for kw in ["climate", "environment", "energy", "pollution"]
+            ):
                 sections["environment"].append(story)
             else:
                 sections["lastly"].append(story)
@@ -216,7 +233,9 @@ def organize_by_section(stories: list[dict], max_top_stories: int = 6) -> dict[s
     return sections
 
 
-def create_mailchimp_draft(html_content: str, subject: Optional[str] = None) -> Optional[str]:
+def create_mailchimp_draft(
+    html_content: str, subject: Optional[str] = None
+) -> Optional[str]:
     """
     Create a draft campaign in Mailchimp.
 
@@ -239,44 +258,46 @@ def create_mailchimp_draft(html_content: str, subject: Optional[str] = None) -> 
 
     try:
         client = MailchimpMarketing.Client()
-        client.set_config({
-            "api_key": os.getenv("MAILCHIMP_API_KEY"),
-            "server": os.getenv("MAILCHIMP_SERVER_PREFIX")
-        })
+        client.set_config(
+            {
+                "api_key": os.getenv("MAILCHIMP_API_KEY"),
+                "server": os.getenv("MAILCHIMP_SERVER_PREFIX"),
+            }
+        )
 
         list_id = os.getenv("MAILCHIMP_LIST_ID")
 
         # Create campaign
-        campaign = client.campaigns.create({
-            "type": "regular",
-            "recipients": {
-                "list_id": list_id
-            },
-            "settings": {
-                "subject_line": subject,
-                "title": f"DNR - {datetime.now().strftime('%Y-%m-%d')}",
-                "from_name": "NJ News Commons",
-                "reply_to": "info@centerforcooperativemedia.org",
-                "preview_text": "The latest stories from across the NJ news ecosystem."
+        campaign = client.campaigns.create(
+            {
+                "type": "regular",
+                "recipients": {"list_id": list_id},
+                "settings": {
+                    "subject_line": subject,
+                    "title": f"DNR - {datetime.now().strftime('%Y-%m-%d')}",
+                    "from_name": "NJ News Commons",
+                    "reply_to": "info@centerforcooperativemedia.org",
+                    "preview_text": "The latest stories from across the NJ news ecosystem.",
+                },
             }
-        })
+        )
 
         campaign_id = campaign["id"]
         print(f"   Created campaign: {campaign_id}")
 
         # Set content
-        client.campaigns.set_content(campaign_id, {
-            "html": html_content
-        })
+        client.campaigns.set_content(campaign_id, {"html": html_content})
         print("   Content uploaded successfully")
 
         # Get web link
         campaign_info = client.campaigns.get(campaign_id)
         web_id = campaign_info.get("web_id")
 
-        print(f"\n✅ Draft created successfully!")
+        print("\n✅ Draft created successfully!")
         print(f"   Campaign ID: {campaign_id}")
-        print(f"   Edit in Mailchimp: https://us5.admin.mailchimp.com/campaigns/edit?id={web_id}")
+        print(
+            f"   Edit in Mailchimp: https://us5.admin.mailchimp.com/campaigns/edit?id={web_id}"
+        )
 
         return campaign_id
 
@@ -295,7 +316,7 @@ def run_pipeline(
     output_dir: Optional[str] = None,
     include_playwright: bool = False,
     enrich_stories: bool = False,
-    enrich_max: int = 20
+    enrich_max: int = 20,
 ) -> Optional[str]:
     """
     Run the full newsletter generation pipeline.
@@ -316,7 +337,7 @@ def run_pipeline(
     print("🗞️  DAILY NEWS ROUNDUP - PIPELINE")
     print("=" * 60)
     print(f"   Date: {datetime.now().strftime('%A, %B %d, %Y')}")
-    mode_str = 'Dry run' if dry_run else 'Preview' if preview_only else 'Full pipeline'
+    mode_str = "Dry run" if dry_run else "Preview" if preview_only else "Full pipeline"
     if include_playwright:
         mode_str += " + Playwright"
     if enrich_stories:
@@ -324,7 +345,9 @@ def run_pipeline(
     print(f"   Mode: {mode_str}")
 
     # Step 1: Fetch stories
-    stories = fetch_all_stories(hours_back=hours_back, include_playwright=include_playwright)
+    stories = fetch_all_stories(
+        hours_back=hours_back, include_playwright=include_playwright
+    )
 
     if not stories:
         print("\n⚠️  No stories found!")
@@ -354,8 +377,15 @@ def run_pipeline(
     print("\n📊 Stories by section:")
     total = 0
     for section, count in counts.items():
-        emoji = {"top_stories": "📰", "politics": "🏛️", "housing": "🏘️",
-                 "education": "🏫", "health": "🦠", "environment": "🌳", "lastly": "☝️"}.get(section, "•")
+        emoji = {
+            "top_stories": "📰",
+            "politics": "🏛️",
+            "housing": "🏘️",
+            "education": "🏫",
+            "health": "🦠",
+            "environment": "🌳",
+            "lastly": "☝️",
+        }.get(section, "•")
         print(f"   {emoji} {section}: {count}")
         total += count
     print(f"   Total: {total}")
@@ -390,20 +420,34 @@ def run_pipeline(
 
 def main():
     parser = argparse.ArgumentParser(description="Daily News Roundup Pipeline")
-    parser.add_argument("--preview", action="store_true",
-                        help="Generate preview only, don't create Mailchimp draft")
-    parser.add_argument("--dry-run", action="store_true",
-                        help="Show story counts without generating")
-    parser.add_argument("--hours", type=int, default=24,
-                        help="Hours back to look for RSS stories (default: 24)")
-    parser.add_argument("--output", type=str,
-                        help="Output directory for preview HTML")
-    parser.add_argument("--playwright", action="store_true",
-                        help="Include Playwright sources (slower, for paywalled/broken RSS sites)")
-    parser.add_argument("--enrich", action="store_true",
-                        help="Enrich stories with Gemini URL context (uses API credits)")
-    parser.add_argument("--enrich-max", type=int, default=20,
-                        help="Max stories to enrich (default: 20)")
+    parser.add_argument(
+        "--preview",
+        action="store_true",
+        help="Generate preview only, don't create Mailchimp draft",
+    )
+    parser.add_argument(
+        "--dry-run", action="store_true", help="Show story counts without generating"
+    )
+    parser.add_argument(
+        "--hours",
+        type=int,
+        default=24,
+        help="Hours back to look for RSS stories (default: 24)",
+    )
+    parser.add_argument("--output", type=str, help="Output directory for preview HTML")
+    parser.add_argument(
+        "--playwright",
+        action="store_true",
+        help="Include Playwright sources (slower, for paywalled/broken RSS sites)",
+    )
+    parser.add_argument(
+        "--enrich",
+        action="store_true",
+        help="Enrich stories with Gemini URL context (uses API credits)",
+    )
+    parser.add_argument(
+        "--enrich-max", type=int, default=20, help="Max stories to enrich (default: 20)"
+    )
 
     args = parser.parse_args()
 
@@ -414,7 +458,7 @@ def main():
         output_dir=args.output,
         include_playwright=args.playwright,
         enrich_stories=args.enrich,
-        enrich_max=args.enrich_max
+        enrich_max=args.enrich_max,
     )
 
     if result:

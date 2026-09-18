@@ -20,9 +20,7 @@ def test_nj_dot_com_urls_get_amp_output_type():
         == "https://www.nj.com/politics/2026/09/story.html?outputType=amp"
     )
     assert (
-        transform_url(
-            "https://www.nj.com/politics/2026/09/story.html?foo=1", "NJ.com"
-        )
+        transform_url("https://www.nj.com/politics/2026/09/story.html?foo=1", "NJ.com")
         == "https://www.nj.com/politics/2026/09/story.html?foo=1&outputType=amp"
     )
 

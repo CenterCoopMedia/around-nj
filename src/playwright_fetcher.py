@@ -13,14 +13,13 @@ Sites covered:
 
 import re
 import sys
-from datetime import datetime, timedelta
-from typing import Optional
-from urllib.parse import urljoin, urlparse
+from datetime import datetime
+from urllib.parse import urljoin
 
 from playwright.sync_api import sync_playwright, TimeoutError as PlaywrightTimeout
 
-if sys.platform == 'win32':
-    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 
 # Sites to scrape with Playwright (RSS feeds broken or unavailable)
@@ -30,21 +29,13 @@ PLAYWRIGHT_SOURCES = {
         "name": "NorthJersey.com",
         "url": "https://www.northjersey.com/news/",
         "disable_js": True,
-        "selectors": {
-            "articles": "a.gnt_m_flm_a",
-            "headline": "self",
-            "link": "self"
-        }
+        "selectors": {"articles": "a.gnt_m_flm_a", "headline": "self", "link": "self"},
     },
     "app": {
         "name": "Asbury Park Press",
         "url": "https://www.app.com/news/",
         "disable_js": True,
-        "selectors": {
-            "articles": "a.gnt_m_flm_a",
-            "headline": "self",
-            "link": "self"
-        }
+        "selectors": {"articles": "a.gnt_m_flm_a", "headline": "self", "link": "self"},
     },
     "pressofac": {
         "name": "Press of Atlantic City",
@@ -53,8 +44,8 @@ PLAYWRIGHT_SOURCES = {
         "selectors": {
             "articles": "h3.tnt-headline a",
             "headline": "self",
-            "link": "self"
-        }
+            "link": "self",
+        },
     },
     # TAPinto network
     "tapinto_montclair": {
@@ -64,8 +55,8 @@ PLAYWRIGHT_SOURCES = {
         "selectors": {
             "articles": "div.article-card a.article-card__link",
             "headline": "h3.article-card__title",
-            "link": "self"
-        }
+            "link": "self",
+        },
     },
     "tapinto_newark": {
         "name": "TAPinto Newark",
@@ -74,8 +65,8 @@ PLAYWRIGHT_SOURCES = {
         "selectors": {
             "articles": "div.article-card a.article-card__link",
             "headline": "h3.article-card__title",
-            "link": "self"
-        }
+            "link": "self",
+        },
     },
     "tapinto_jerseycity": {
         "name": "TAPinto Jersey City",
@@ -84,8 +75,8 @@ PLAYWRIGHT_SOURCES = {
         "selectors": {
             "articles": "div.article-card a.article-card__link",
             "headline": "h3.article-card__title",
-            "link": "self"
-        }
+            "link": "self",
+        },
     },
     "tapinto_trenton": {
         "name": "TAPinto Trenton",
@@ -94,8 +85,8 @@ PLAYWRIGHT_SOURCES = {
         "selectors": {
             "articles": "div.article-card a.article-card__link",
             "headline": "h3.article-card__title",
-            "link": "self"
-        }
+            "link": "self",
+        },
     },
     "tapinto_elizabeth": {
         "name": "TAPinto Elizabeth",
@@ -104,8 +95,8 @@ PLAYWRIGHT_SOURCES = {
         "selectors": {
             "articles": "div.article-card a.article-card__link",
             "headline": "h3.article-card__title",
-            "link": "self"
-        }
+            "link": "self",
+        },
     },
     "tapinto_newbrunswick": {
         "name": "TAPinto New Brunswick",
@@ -114,17 +105,14 @@ PLAYWRIGHT_SOURCES = {
         "selectors": {
             "articles": "div.article-card a.article-card__link",
             "headline": "h3.article-card__title",
-            "link": "self"
-        }
+            "link": "self",
+        },
     },
 }
 
 
 def scrape_site(
-    source_key: str,
-    config: dict,
-    max_articles: int = 20,
-    hours_back: int = 24
+    source_key: str, config: dict, max_articles: int = 20, hours_back: int = 24
 ) -> list[dict]:
     """
     Scrape a single news site using Playwright.
@@ -153,9 +141,15 @@ def scrape_site(
                 context.set_extra_http_headers({"Accept": "text/html"})
                 # Create page with JS disabled
                 page = context.new_page()
-                page.route("**/*", lambda route: route.abort()
-                          if route.request.resource_type in ["script", "stylesheet", "image", "font"]
-                          else route.continue_())
+                page.route(
+                    "**/*",
+                    lambda route: (
+                        route.abort()
+                        if route.request.resource_type
+                        in ["script", "stylesheet", "image", "font"]
+                        else route.continue_()
+                    ),
+                )
             else:
                 page = context.new_page()
 
@@ -188,7 +182,7 @@ def scrape_site(
                     if headline and url:
                         # Clean up headline
                         headline = headline.strip()
-                        headline = re.sub(r'\s+', ' ', headline)
+                        headline = re.sub(r"\s+", " ", headline)
 
                         # Make URL absolute
                         if url and not url.startswith("http"):
@@ -198,16 +192,18 @@ def scrape_site(
                         if len(headline) < 15:
                             continue
 
-                        stories.append({
-                            "headline": headline,
-                            "title": headline,
-                            "url": url,
-                            "source": config["name"],
-                            "published": datetime.now(),  # No date available from listing
-                            "from_playwright": True
-                        })
+                        stories.append(
+                            {
+                                "headline": headline,
+                                "title": headline,
+                                "url": url,
+                                "source": config["name"],
+                                "published": datetime.now(),  # No date available from listing
+                                "from_playwright": True,
+                            }
+                        )
 
-                except Exception as e:
+                except Exception:
                     continue
 
             browser.close()
@@ -221,8 +217,7 @@ def scrape_site(
 
 
 def fetch_all_playwright_sources(
-    hours_back: int = 24,
-    max_per_source: int = 15
+    hours_back: int = 24, max_per_source: int = 15
 ) -> list[dict]:
     """
     Fetch stories from all Playwright-based sources.
@@ -287,7 +282,7 @@ if __name__ == "__main__":
         test_single_source(args.test)
     elif args.all:
         stories = fetch_all_playwright_sources()
-        print(f"\n{'='*60}")
+        print(f"\n{'=' * 60}")
         print(f"Total stories fetched: {len(stories)}")
     else:
         # Default: test NorthJersey.com

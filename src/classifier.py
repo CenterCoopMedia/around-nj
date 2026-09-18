@@ -18,7 +18,7 @@ SECTIONS = [
     "health",
     "environment",
     "lastly",
-    "skip"  # For non-NJ or irrelevant content
+    "skip",  # For non-NJ or irrelevant content
 ]
 
 # Section descriptions based on historical newsletter patterns
@@ -30,78 +30,254 @@ SECTION_DESCRIPTIONS = {
     "health": "NJ health: COVID updates (cases, vaccines, mandates), hospital news, health disparities, public health policy, mental health, nursing homes, healthcare access. Must be about New Jersey healthcare or directly affect NJ residents.",
     "environment": "NJ environment: offshore wind projects, clean energy policy, warehouse bans (environmental impact), significant weather events (NOT routine forecasts), tree preservation, Superfund sites/PFAS, climate initiatives, plastic bag ban, Pinelands, spotted lanternfly. Must be about New Jersey.",
     "lastly": "Lighter NJ news: arts/culture, NJ sports (Devils, local teams), restaurants/food, community events, human interest profiles, tourism (shore, AC), product recalls, casinos, local celebrations. Lighter news with NJ focus.",
-    "skip": "NOT for newsletter: National/wire stories without NJ focus, NYC-only news (Manhattan, Brooklyn, etc.), generic health/lifestyle advice, Pennsylvania/Delaware news, national politics without NJ angle, stories that only mention NJ in passing, individual crimes/crashes without policy implications."
+    "skip": "NOT for newsletter: National/wire stories without NJ focus, NYC-only news (Manhattan, Brooklyn, etc.), generic health/lifestyle advice, Pennsylvania/Delaware news, national politics without NJ angle, stories that only mention NJ in passing, individual crimes/crashes without policy implications.",
 }
 
 # Keywords that indicate NJ relevance
 NJ_KEYWORDS = [
-    "new jersey", "n.j.", "nj", "jersey", "newark", "trenton", "camden", "paterson",
-    "jersey city", "elizabeth", "edison", "woodbridge", "lakewood", "toms river",
-    "hamilton", "clifton", "brick", "cherry hill", "passaic", "union city",
-    "bayonne", "east orange", "vineland", "new brunswick", "perth amboy", "hoboken",
-    "plainfield", "hackensack", "sayreville", "kearny", "linden", "atlantic city",
-    "montclair", "maplewood", "south orange", "morristown", "princeton", "rutgers",
-    "murphy", "sherrill", "nj transit", "garden state", "turnpike", "parkway",
-    "shore", "pinelands", "meadowlands"
+    "new jersey",
+    "n.j.",
+    "nj",
+    "jersey",
+    "newark",
+    "trenton",
+    "camden",
+    "paterson",
+    "jersey city",
+    "elizabeth",
+    "edison",
+    "woodbridge",
+    "lakewood",
+    "toms river",
+    "hamilton",
+    "clifton",
+    "brick",
+    "cherry hill",
+    "passaic",
+    "union city",
+    "bayonne",
+    "east orange",
+    "vineland",
+    "new brunswick",
+    "perth amboy",
+    "hoboken",
+    "plainfield",
+    "hackensack",
+    "sayreville",
+    "kearny",
+    "linden",
+    "atlantic city",
+    "montclair",
+    "maplewood",
+    "south orange",
+    "morristown",
+    "princeton",
+    "rutgers",
+    "murphy",
+    "sherrill",
+    "nj transit",
+    "garden state",
+    "turnpike",
+    "parkway",
+    "shore",
+    "pinelands",
+    "meadowlands",
 ]
 
 # Keywords that indicate non-NJ content to skip
 SKIP_KEYWORDS = [
-    "new york city", "nyc", "manhattan", "brooklyn", "queens", "bronx", "staten island",
-    "long island", "upstate new york", "westchester", "connecticut", "pennsylvania",
-    "washington d.c.", "california", "texas", "florida", "chicago", "los angeles",
-    "trump tower", "white house"  # National politics without NJ angle
+    "new york city",
+    "nyc",
+    "manhattan",
+    "brooklyn",
+    "queens",
+    "bronx",
+    "staten island",
+    "long island",
+    "upstate new york",
+    "westchester",
+    "connecticut",
+    "pennsylvania",
+    "washington d.c.",
+    "california",
+    "texas",
+    "florida",
+    "chicago",
+    "los angeles",
+    "trump tower",
+    "white house",  # National politics without NJ angle
 ]
 
 # Keywords that should NEVER be in top_stories (crime/crash/"if it bleeds it leads")
 # These stories should go to skip or other sections, not top_stories
 TOP_STORIES_EXCLUSION_KEYWORDS = [
     # Crime
-    "carjacked", "carjacking", "robbed", "robbery", "robbery", "murder", "murdered",
-    "homicide", "killed", "killing", "stabbed", "stabbing", "shot", "shooting",
-    "assault", "assaulted", "armed robbery", "home invasion", "burglar", "burglary",
-    "theft", "stolen", "arson", "kidnapped", "kidnapping", "rape", "raped",
-    "sex assault", "sexual assault", "manslaughter", "hit-and-run", "hit and run",
-    "drug bust", "drug arrest", "overdose", "found dead", "body found",
+    "carjacked",
+    "carjacking",
+    "robbed",
+    "robbery",
+    "robbery",
+    "murder",
+    "murdered",
+    "homicide",
+    "killed",
+    "killing",
+    "stabbed",
+    "stabbing",
+    "shot",
+    "shooting",
+    "assault",
+    "assaulted",
+    "armed robbery",
+    "home invasion",
+    "burglar",
+    "burglary",
+    "theft",
+    "stolen",
+    "arson",
+    "kidnapped",
+    "kidnapping",
+    "rape",
+    "raped",
+    "sex assault",
+    "sexual assault",
+    "manslaughter",
+    "hit-and-run",
+    "hit and run",
+    "drug bust",
+    "drug arrest",
+    "overdose",
+    "found dead",
+    "body found",
     # Crashes/accidents
-    "crash", "crashed", "fatal crash", "deadly crash", "wrong-way driver",
-    "car accident", "vehicle accident", "truck crash", "bus crash", "pedestrian struck",
-    "pedestrian hit", "pedestrian killed", "motorcyclist killed", "cyclist killed",
-    "dies in crash", "killed in crash", "injured in crash", "multi-car",
-    "multi-vehicle", "pileup", "pile-up", "rollover",
+    "crash",
+    "crashed",
+    "fatal crash",
+    "deadly crash",
+    "wrong-way driver",
+    "car accident",
+    "vehicle accident",
+    "truck crash",
+    "bus crash",
+    "pedestrian struck",
+    "pedestrian hit",
+    "pedestrian killed",
+    "motorcyclist killed",
+    "cyclist killed",
+    "dies in crash",
+    "killed in crash",
+    "injured in crash",
+    "multi-car",
+    "multi-vehicle",
+    "pileup",
+    "pile-up",
+    "rollover",
     # Fires/disasters (unless policy-related)
-    "house fire", "apartment fire", "building fire", "blaze kills", "fire kills",
-    "explosion kills", "gas explosion",
+    "house fire",
+    "apartment fire",
+    "building fire",
+    "blaze kills",
+    "fire kills",
+    "explosion kills",
+    "gas explosion",
     # Other incidents
-    "drowning", "drowned", "missing person", "amber alert", "child abduction",
+    "drowning",
+    "drowned",
+    "missing person",
+    "amber alert",
+    "child abduction",
     # High school sports
-    "high school football", "high school basketball", "high school soccer",
-    "high school baseball", "high school softball", "high school wrestling",
-    "high school hockey", "high school lacrosse", "high school track",
-    "varsity", "jv ", "junior varsity", "state championship", "tournament seeds",
-    "all-state", "all-county", "player of the week", "athlete of the week",
-    "game of the week", "final score", "box score", "playoff bracket",
+    "high school football",
+    "high school basketball",
+    "high school soccer",
+    "high school baseball",
+    "high school softball",
+    "high school wrestling",
+    "high school hockey",
+    "high school lacrosse",
+    "high school track",
+    "varsity",
+    "jv ",
+    "junior varsity",
+    "state championship",
+    "tournament seeds",
+    "all-state",
+    "all-county",
+    "player of the week",
+    "athlete of the week",
+    "game of the week",
+    "final score",
+    "box score",
+    "playoff bracket",
     # Shopping/gift guides/deals
-    "gift guide", "gift ideas", "holiday gifts", "best gifts", "top gifts",
-    "shopping guide", "deals", "discount", "sale prices", "black friday",
-    "cyber monday", "where to buy", "best places to buy", "shopping list",
+    "gift guide",
+    "gift ideas",
+    "holiday gifts",
+    "best gifts",
+    "top gifts",
+    "shopping guide",
+    "deals",
+    "discount",
+    "sale prices",
+    "black friday",
+    "cyber monday",
+    "where to buy",
+    "best places to buy",
+    "shopping list",
     "stocking stuffers",
     # Lottery/gambling results
-    "lottery", "powerball", "mega millions", "winning numbers", "jackpot winner",
-    "lottery winner", "scratch-off", "pick-6", "pick 6", "cash5", "cash 5",
+    "lottery",
+    "powerball",
+    "mega millions",
+    "winning numbers",
+    "jackpot winner",
+    "lottery winner",
+    "scratch-off",
+    "pick-6",
+    "pick 6",
+    "cash5",
+    "cash 5",
     # Restaurant/food reviews
-    "restaurant review", "food review", "best restaurants", "best pizza",
-    "best bagels", "best diners", "best burgers", "best tacos", "best sushi",
-    "best ice cream", "best coffee", "where to eat", "new restaurant",
-    "restaurant opens", "restaurant closing", "michelin", "food critic",
-    "we tried", "taste test", "food ranking", "ranked the best",
+    "restaurant review",
+    "food review",
+    "best restaurants",
+    "best pizza",
+    "best bagels",
+    "best diners",
+    "best burgers",
+    "best tacos",
+    "best sushi",
+    "best ice cream",
+    "best coffee",
+    "where to eat",
+    "new restaurant",
+    "restaurant opens",
+    "restaurant closing",
+    "michelin",
+    "food critic",
+    "we tried",
+    "taste test",
+    "food ranking",
+    "ranked the best",
     # Expensive house sales (rich people real estate porn)
-    "most expensive home", "most expensive house", "mansion sells",
-    "mansion sold", "just sold for", "sells for $", "sold for $",
-    "million-dollar home", "multi-million", "luxury home sells",
-    "priciest home", "record-breaking sale", "celebrity home",
-    "stunning home", "dream home sold", "these homes just sold",
-    "houses that sold", "highest-priced",
+    "most expensive home",
+    "most expensive house",
+    "mansion sells",
+    "mansion sold",
+    "just sold for",
+    "sells for $",
+    "sold for $",
+    "million-dollar home",
+    "multi-million",
+    "luxury home sells",
+    "priciest home",
+    "record-breaking sale",
+    "celebrity home",
+    "stunning home",
+    "dream home sold",
+    "these homes just sold",
+    "houses that sold",
+    "highest-priced",
 ]
 
 
@@ -151,10 +327,7 @@ def filter_top_stories(stories: list[dict]) -> list[dict]:
 
 
 def classify_story(
-    headline: str,
-    url: str,
-    summary: Optional[str] = None,
-    source: Optional[str] = None
+    headline: str, url: str, summary: Optional[str] = None, source: Optional[str] = None
 ) -> dict:
     """
     Classify a single story into a newsletter section using Claude.
@@ -177,10 +350,9 @@ def classify_story(
     if source:
         story_info += f"\nSource: {source}"
 
-    section_list = "\n".join([
-        f"- {section}: {desc}"
-        for section, desc in SECTION_DESCRIPTIONS.items()
-    ])
+    section_list = "\n".join(
+        [f"- {section}: {desc}" for section, desc in SECTION_DESCRIPTIONS.items()]
+    )
 
     prompt = f"""You are classifying news stories for a NEW JERSEY-focused daily newsletter.
 
@@ -217,7 +389,7 @@ Rules:
         message = client.messages.create(
             model="claude-3-haiku-20240307",
             max_tokens=200,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
         )
 
         response_text = message.content[0].text.strip()
@@ -243,11 +415,13 @@ Rules:
         return {
             "section": "lastly",
             "confidence": 0.3,
-            "reasoning": f"Classification failed: {str(e)}"
+            "reasoning": f"Classification failed: {str(e)}",
         }
 
 
-def classify_stories_batch(stories: list[dict], max_per_request: int = 10) -> list[dict]:
+def classify_stories_batch(
+    stories: list[dict], max_per_request: int = 10
+) -> list[dict]:
     """
     Classify multiple stories efficiently using batch requests.
 
@@ -264,20 +438,21 @@ def classify_stories_batch(stories: list[dict], max_per_request: int = 10) -> li
 
     # Process in batches
     for i in range(0, len(stories), max_per_request):
-        batch = stories[i:i + max_per_request]
+        batch = stories[i : i + max_per_request]
 
         # Build batch prompt
-        stories_text = "\n\n".join([
-            f"[{j+1}] Headline: {s.get('headline', s.get('title', ''))}\n"
-            f"    URL: {s.get('url', '')}\n"
-            f"    Source: {s.get('source', 'Unknown')}"
-            for j, s in enumerate(batch)
-        ])
+        stories_text = "\n\n".join(
+            [
+                f"[{j + 1}] Headline: {s.get('headline', s.get('title', ''))}\n"
+                f"    URL: {s.get('url', '')}\n"
+                f"    Source: {s.get('source', 'Unknown')}"
+                for j, s in enumerate(batch)
+            ]
+        )
 
-        section_list = "\n".join([
-            f"- {section}: {desc}"
-            for section, desc in SECTION_DESCRIPTIONS.items()
-        ])
+        section_list = "\n".join(
+            [f"- {section}: {desc}" for section, desc in SECTION_DESCRIPTIONS.items()]
+        )
 
         prompt = f"""Classify these news stories for a NEW JERSEY-focused daily newsletter.
 
@@ -313,7 +488,7 @@ Rules:
             message = client.messages.create(
                 model="claude-3-haiku-20240307",
                 max_tokens=500,
-                messages=[{"role": "user", "content": prompt}]
+                messages=[{"role": "user", "content": prompt}],
             )
 
             response_text = message.content[0].text.strip()
@@ -347,7 +522,7 @@ Rules:
                     headline=story.get("headline", story.get("title", "")),
                     url=story.get("url", ""),
                     summary=story.get("summary"),
-                    source=story.get("source")
+                    source=story.get("source"),
                 )
                 story_copy = story.copy()
                 story_copy["section"] = result["section"]
@@ -372,7 +547,7 @@ def select_best_headline(headlines: list[str]) -> str:
 
     client = anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
-    headlines_text = "\n".join([f"{i+1}. {h}" for i, h in enumerate(headlines)])
+    headlines_text = "\n".join([f"{i + 1}. {h}" for i, h in enumerate(headlines)])
 
     prompt = f"""Select the best headline from these options covering the same story:
 
@@ -390,7 +565,7 @@ Respond with just the number of the best headline."""
         message = client.messages.create(
             model="claude-3-haiku-20240307",
             max_tokens=10,
-            messages=[{"role": "user", "content": prompt}]
+            messages=[{"role": "user", "content": prompt}],
         )
 
         response = message.content[0].text.strip()
@@ -398,7 +573,7 @@ Respond with just the number of the best headline."""
         num = int("".join(c for c in response if c.isdigit()))
         if 1 <= num <= len(headlines):
             return headlines[num - 1]
-    except:
+    except Exception:
         pass
 
     # Fallback: return first headline
@@ -408,31 +583,31 @@ Respond with just the number of the best headline."""
 if __name__ == "__main__":
     import sys
 
-    if sys.platform == 'win32':
-        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    if sys.platform == "win32":
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
     # Test classification
     test_stories = [
         {
             "headline": "Murphy signs bill expanding offshore wind development in New Jersey",
             "url": "https://example.com/1",
-            "source": "NJ Spotlight"
+            "source": "NJ Spotlight",
         },
         {
             "headline": "Jersey City school board approves $1.2 billion budget",
             "url": "https://example.com/2",
-            "source": "NJ.com"
+            "source": "NJ.com",
         },
         {
             "headline": "New ramen shop opens in Montclair, draws crowds",
             "url": "https://example.com/3",
-            "source": "Montclair Local"
+            "source": "Montclair Local",
         },
         {
             "headline": "NJ Transit fares to increase 15% starting July 1",
             "url": "https://example.com/4",
-            "source": "NorthJersey.com"
-        }
+            "source": "NorthJersey.com",
+        },
     ]
 
     print("=" * 60)
@@ -443,4 +618,6 @@ if __name__ == "__main__":
 
     for story in results:
         print(f"\n{story['source']}: {story['headline'][:50]}...")
-        print(f"  → Section: {story['section']} (confidence: {story.get('confidence', 'N/A')})")
+        print(
+            f"  → Section: {story['section']} (confidence: {story.get('confidence', 'N/A')})"
+        )
