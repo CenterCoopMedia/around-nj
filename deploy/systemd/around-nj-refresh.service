@@ -1,0 +1,15 @@
+[Unit]
+Description=Refresh Around New Jersey headlines
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/jamditis/projects/dnr
+Environment=AROUND_NJ_PUBLISH=0
+ExecStart=/home/jamditis/projects/dnr/scripts/run_around_nj_refresh.sh
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=default.target

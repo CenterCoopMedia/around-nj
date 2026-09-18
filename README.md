@@ -27,8 +27,13 @@ https://centercoopmedia.github.io/around-nj/
 Rebuild:
 
 ```bash
-python scripts/build_around_nj_demo.py --output drafts/around-nj-demo.html
+python scripts/scrape_partner_homepages.py --output drafts/scraped_headlines.json
+python scripts/build_around_nj_demo.py \
+  --scraped-json drafts/scraped_headlines.json \
+  --output drafts/snapshot.html
 ```
+
+Officejawn timer `around-nj-refresh.timer` runs that at 6:30am and 2:00pm Eastern. Firecrawl covers invitation-list sites with no usable RSS. Facebook pages and outlets with no homepage are still skipped.
 
 See `docs/around-nj-demo.md`.
 

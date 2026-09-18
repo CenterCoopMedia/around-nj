@@ -423,6 +423,10 @@ def main() -> None:
         default=str(ROOT / "drafts" / "around-nj-demo.html"),
         help="HTML output path",
     )
+    parser.add_argument(
+        "--scraped-json",
+        help="Optional Firecrawl homepage scrape output to merge",
+    )
     args = parser.parse_args()
 
     feeds_cfg = json.loads(
@@ -496,6 +500,32 @@ def main() -> None:
                 stories.extend(result["items"])
             else:
                 failures.append(result)
+    if args.scraped_json:
+        scraped = json.loads(Path(args.scraped_json).read_text(encoding="utf-8"))
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_HOURS)
+        for block in scraped.get("results") or []:
+            org = str(block.get("org") or "Scrape")
+            if block.get("ok") and block.get("url"):
+                ok_urls.add(str(block["url"]))
+            for item in block.get("stories") or []:
+                link = valid_story_link(str(item.get("url") or ""))
+                title = " ".join(str(item.get("title") or "").split())
+                if not link or not title:
+                    continue
+                when = parse_when({"published": item.get("published")})
+                if when is None:
+                    when = datetime.now(timezone.utc)
+                if when < cutoff:
+                    continue
+                stories.append(
+                    {
+                        "title": title,
+                        "url": link,
+                        "when": when.isoformat(),
+                        "source": str(item.get("source") or org),
+                        "partner": True,
+                    }
+                )
     if failures:
         expected = [
             f
