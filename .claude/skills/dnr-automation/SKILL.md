@@ -1,19 +1,30 @@
 ---
 name: dnr-automation
-description: Automate the Daily News Roundup (DNR) newsletter pipeline for the Center for Cooperative Media. Run the DNR script with different modes (--preview generates HTML preview only, --dry-run shows story counts without generating files, full pipeline creates Mailchimp draft). Use this skill when working on DNR newsletter automation, running the pipeline, previewing newsletters, testing story collection and classification, or troubleshooting the NJ News Commons newsletter workflow.
+description: Automate Around New Jersey (NJ PBS) collection and the Daily News Roundup Mailchimp newsletter. Use for the partner-starred snapshot (scripts/build_around_nj_demo.py), RSS/Airtable collection, classification, previews, and Mailchimp drafts. Triggers: Around New Jersey, DNR, News Commons partners, NJ PBS feed.
 allowed-tools: Bash, Read, Glob, Grep
 ---
 
-# DNR Newsletter Automation
+# Around New Jersey and DNR automation
 
 ## When to Activate
 
 Activate this skill when:
+- User wants the NJ PBS Around New Jersey snapshot or partner-starred feed
 - User wants to run the DNR newsletter pipeline
 - User mentions "create newsletter", "run DNR", or "generate preview"
 - Troubleshooting pipeline issues
 - Testing story collection or classification
 - Checking story counts or feed connectivity
+
+## Around New Jersey snapshot
+
+This does **not** create a Mailchimp draft. It writes branded HTML only.
+
+```bash
+python scripts/build_around_nj_demo.py --output drafts/around-nj-demo.html
+```
+
+Publish by copying that file to `index.html` on the `gh-pages` branch. Live URL: https://centercoopmedia.github.io/around-nj/
 
 ## Core Concepts
 
@@ -95,6 +106,13 @@ venv/Scripts/python.exe src/test_connections.py
 - Use feedback loop in Step 6 to move stories
 
 ## Examples
+
+**Input**: "Refresh the Around New Jersey demo"
+
+**Output**: Snapshot only, no Mailchimp:
+```bash
+python scripts/build_around_nj_demo.py --output drafts/around-nj-demo.html
+```
 
 **Input**: "Run the newsletter"
 

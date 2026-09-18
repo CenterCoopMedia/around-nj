@@ -1,0 +1,219 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Around New Jersey · NJ PBS</title>
+<meta name="description" content="Headlines from New Jersey newsrooms, with News Commons partners marked.">
+<meta property="og:title" content="Around New Jersey · NJ PBS">
+<meta property="og:description" content="Headlines from New Jersey newsrooms, with News Commons partners marked.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://centercoopmedia.github.io/around-nj/">
+<meta property="og:image" content="https://njpbs.org/og-default.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Around New Jersey · NJ PBS">
+<meta name="twitter:description" content="Headlines from New Jersey newsrooms, with News Commons partners marked.">
+<meta name="twitter:image" content="https://njpbs.org/og-default.png">
+<link rel="icon" href="brand/pbs-white.svg">
+<style>
+@font-face {
+  font-family: "PBS Sans";
+  src: url("brand/fonts/PBSSans.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "PBS Sans";
+  src: url("brand/fonts/PBSSans-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "PBS Sans";
+  src: url("brand/fonts/PBSSans-Bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+:root {
+  --pbs-blue: #2638c4;
+  --pbs-blue-bright: #4d5ee8;
+  --focus: #aeb7ff;
+  --bg-0: #06070f;
+  --bg-1: #0b0e1d;
+  --bg-2: #131736;
+  --text: #f3f4fb;
+  --text-dim: #c0c5dc;
+  --line: rgba(255, 255, 255, 0.13);
+}
+* { box-sizing: border-box; }
+html { color-scheme: dark; }
+body {
+  margin: 0;
+  font: 17px/1.5 "PBS Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  color: var(--text);
+  background: var(--bg-0);
+}
+a { color: var(--focus); }
+.masthead {
+  background: #0b1f3a;
+  border-bottom: 1px solid var(--line);
+}
+.masthead-inner {
+  max-width: 920px;
+  margin: 0 auto;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.masthead img { display: block; height: 36px; width: auto; }
+.masthead-meta { color: var(--text-dim); font-size: 0.92rem; }
+main { max-width: 920px; margin: 0 auto; padding: 36px 24px 24px; }
+h1 {
+  font-size: 2.35rem;
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  margin: 0 0 12px;
+}
+.lede { color: var(--text-dim); max-width: 62ch; margin: 0 0 20px; }
+.meta { color: var(--text-dim); font-size: 0.92rem; margin: 0 0 28px; }
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  margin: 0 0 28px;
+}
+.stat {
+  background: var(--bg-1);
+  padding: 14px 16px;
+}
+.stat b { display: block; font-size: 1.6rem; }
+.stat span { color: var(--text-dim); font-size: 0.88rem; }
+.filters {
+  display: flex;
+  gap: 20px;
+  margin: 0 0 32px;
+  border-bottom: 1px solid var(--line);
+}
+.filters button {
+  appearance: none;
+  background: none;
+  border: 0;
+  border-bottom: 2px solid transparent;
+  color: var(--text-dim);
+  font: inherit;
+  padding: 8px 0 10px;
+  cursor: pointer;
+}
+.filters button[aria-pressed="true"] {
+  color: var(--text);
+  border-bottom-color: var(--pbs-blue-bright);
+}
+h2 { font-size: 1.2rem; font-weight: 700; margin: 36px 0 10px; }
+.note { color: var(--text-dim); font-size: 0.95rem; max-width: 70ch; }
+ul.stories { list-style: none; padding: 0; margin: 0; }
+ul.stories li {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+}
+ul.stories a {
+  color: var(--text);
+  text-decoration: none;
+  font-weight: 500;
+}
+ul.stories a:hover { text-decoration: underline; }
+.src, .when { color: var(--text-dim); font-weight: 400; font-size: 0.92rem; }
+.src::before { content: " · "; }
+.star {
+  display: inline-block;
+  margin-right: 8px;
+  color: var(--focus);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+body.partners-only .is-other,
+body.partners-only #other-block { display: none; }
+table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 12px 0 28px; }
+th, td { text-align: left; padding: 10px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
+th { font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-dim); font-weight: 500; }
+footer {
+  max-width: 920px;
+  margin: 0 auto 64px;
+  padding: 24px;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  border-top: 1px solid var(--line);
+}
+</style>
+</head>
+<body>
+  <header class="masthead">
+    <div class="masthead-inner">
+      <a href="https://njpbs.org/"><img src="brand/njpbs-horizontal-white.svg" width="146" height="40" alt="NJ PBS"></a>
+      <p class="masthead-meta">NJ PBS News</p>
+    </div>
+  </header>
+  <main>
+    <h1>Around New Jersey</h1>
+    <p class="lede">Headlines from New Jersey newsrooms, with News Commons partners marked. Built from the Daily News Roundup feed list plus the organizations that signed up to work with NJ PBS.</p>
+    <p class="meta">Demo snapshot · {{NOW}} · last 72 hours · not a live product</p>
+    <div class="stats">
+      <div class="stat"><b>{{PARTNER_COUNT}}</b><span>Partner headlines</span></div>
+      <div class="stat"><b>{{OTHER_COUNT}}</b><span>Other NJ headlines</span></div>
+      <div class="stat"><b>{{PARTNER_RSS_COUNT}}</b><span>Partner feeds found</span></div>
+      <div class="stat"><b>{{DNR_FEED_COUNT}}</b><span>Statewide DNR feeds</span></div>
+    </div>
+    <div class="filters" role="group" aria-label="Filter headlines">
+      <button type="button" data-filter="all" aria-pressed="true">All stories</button>
+      <button type="button" data-filter="partners" aria-pressed="false">Partners only</button>
+    </div>
+    <section id="partner-block">
+      <h2>Partner headlines</h2>
+      <p class="note">These came from organizations on the NJ PBS invitation list. Showing {{PARTNER_SHOWN}} of {{PARTNER_COUNT}}. Duplicate URLs are removed. {{TAPINTO_NOTE}}</p>
+      <ul class="stories">
+{{PARTNER_ITEMS}}
+      </ul>
+    </section>
+    <section id="other-block">
+      <h2>Other New Jersey headlines</h2>
+      <p class="note">Same window, from the existing Daily News Roundup feed list. Showing {{OTHER_SHOWN}} of {{OTHER_COUNT}}. This is the statewide layer. The partner filter sits on top.</p>
+      <ul class="stories">
+{{OTHER_ITEMS}}
+      </ul>
+    </section>
+    <h2>Partner coverage</h2>
+    <p class="note">{{PARTNER_RSS_COUNT}} of {{PARTNER_TOTAL}} mapped outlets have a working RSS feed right now. The rest need a homepage scrape, a paid login, or are not daily text publishers.</p>
+    <table>
+    <thead><tr><th>Organization</th><th>Type</th><th>RSS</th><th>Site</th></tr></thead>
+    <tbody>
+{{COVERAGE_ROWS}}
+    </tbody>
+  </table>
+  </main>
+  <footer>
+    NJ PBS · Center for Cooperative Media · Daily News Roundup demo · {{NOW}}.
+    Official NJ PBS marks. This page is a snapshot. It does not log in to paywalls and it does not send Mailchimp campaigns.
+  </footer>
+  <script>
+    const buttons = document.querySelectorAll(".filters button");
+    buttons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const partners = btn.dataset.filter === "partners";
+        document.body.classList.toggle("partners-only", partners);
+        buttons.forEach((other) => other.setAttribute("aria-pressed", String(other === btn)));
+        const otherBlock = document.getElementById("other-block");
+        if (otherBlock) otherBlock.hidden = partners;
+      });
+    });
+  </script>
+</body>
+</html>
