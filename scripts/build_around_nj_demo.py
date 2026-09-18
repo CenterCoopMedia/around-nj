@@ -236,7 +236,7 @@ def fetch_feed(url: str, source: str, partner: bool = False) -> dict:
             result["error"] = f"http {status}"
             return result
         parsed = feedparser.parse(body)
-        if parsed.bozo and not parsed.entries:
+        if not parsed.entries and (parsed.bozo or not parsed.get("version")):
             result["error"] = "not a feed"
             return result
         now = datetime.now(timezone.utc)
@@ -274,18 +274,20 @@ def fetch_feed(url: str, source: str, partner: bool = False) -> dict:
 
 
 def fetch_feed_bounded(url: str, source: str, partner: bool = False) -> dict:
-    with ThreadPoolExecutor(max_workers=1) as inner:
-        fut = inner.submit(fetch_feed, url, source, partner)
-        try:
-            return fut.result(timeout=DEADLINE_SECONDS + 2)
-        except FuturesTimeout:
-            return {
-                "source": source,
-                "url": url,
-                "ok": False,
-                "items": [],
-                "error": "deadline",
-            }
+    inner = ThreadPoolExecutor(max_workers=1)
+    fut = inner.submit(fetch_feed, url, source, partner)
+    try:
+        return fut.result(timeout=DEADLINE_SECONDS + 2)
+    except FuturesTimeout:
+        return {
+            "source": source,
+            "url": url,
+            "ok": False,
+            "items": [],
+            "error": "deadline",
+        }
+    finally:
+        inner.shutdown(wait=False, cancel_futures=True)
 
 
 def fmt_when(iso: str | None) -> str:
