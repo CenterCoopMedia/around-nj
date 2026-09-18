@@ -5,10 +5,12 @@ from __future__ import annotations
 
 import argparse
 import html
+import http.client
 import ipaddress
 import json
 import re
 import socket
+import ssl
 import sys
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
@@ -19,7 +21,6 @@ from urllib.parse import urljoin, urlparse
 from zoneinfo import ZoneInfo
 
 import feedparser
-import requests
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
@@ -36,47 +37,71 @@ NJ_TZ = ZoneInfo("America/New_York")
 EXPECTED_FAILURE_PREFIXES = ("http 403",)
 
 
-def is_public_http_url(url: str) -> bool:
+def ip_is_allowed(ip: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
+    """Allow only globally routed unicast addresses. This excludes Tailscale CGNAT."""
+    return bool(ip.is_global)
+
+
+def pinned_addrinfo(host: str, port: int):
+    infos = socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
+    chosen = None
+    for family, socktype, proto, _, sockaddr in infos:
+        ip = ipaddress.ip_address(sockaddr[0])
+        if not ip_is_allowed(ip):
+            raise ValueError("blocked host")
+        if chosen is None:
+            chosen = (family, socktype, proto, sockaddr)
+    if chosen is None:
+        raise ValueError("blocked host")
+    return chosen
+
+
+def fetch_url_bytes(url: str, hops: int = 0) -> tuple[int, bytes]:
+    if hops > MAX_REDIRECTS:
+        raise ValueError("too many redirects")
     parsed = urlparse(url)
     if parsed.scheme not in ("http", "https") or not parsed.hostname:
-        return False
-    host = parsed.hostname
-    if host in {"localhost", "localhost.localdomain"}:
-        return False
+        raise ValueError("blocked host")
+    port = parsed.port or (443 if parsed.scheme == "https" else 80)
+    family, socktype, proto, sockaddr = pinned_addrinfo(parsed.hostname, port)
+    sock = socket.socket(family, socktype, proto)
+    sock.settimeout(TIMEOUT)
+    sock.connect(sockaddr)
+    if parsed.scheme == "https":
+        ctx = ssl.create_default_context()
+        sock = ctx.wrap_socket(sock, server_hostname=parsed.hostname)
+    if parsed.scheme == "https":
+        conn = http.client.HTTPSConnection(parsed.hostname, port, timeout=TIMEOUT)
+    else:
+        conn = http.client.HTTPConnection(parsed.hostname, port, timeout=TIMEOUT)
+    conn.sock = sock
+    path = parsed.path or "/"
+    if parsed.query:
+        path += "?" + parsed.query
+    conn.request("GET", path, headers={"User-Agent": UA, "Host": parsed.hostname})
+    response = conn.getresponse()
     try:
-        infos = socket.getaddrinfo(host, None)
-    except socket.gaierror:
-        return False
-    for info in infos:
-        ip = ipaddress.ip_address(info[4][0])
-        if (
-            ip.is_private
-            or ip.is_loopback
-            or ip.is_link_local
-            or ip.is_reserved
-            or ip.is_multicast
-        ):
-            return False
-    return True
-
-
-def open_public_feed(session: requests.Session, url: str) -> requests.Response:
-    current = url
-    for _ in range(MAX_REDIRECTS + 1):
-        if not is_public_http_url(current):
-            raise ValueError("blocked host")
-        response = session.get(
-            current, timeout=TIMEOUT, allow_redirects=False, stream=True
-        )
-        if response.is_redirect or response.status_code in {301, 302, 303, 307, 308}:
-            location = response.headers.get("Location")
-            response.close()
+        if response.status in {301, 302, 303, 307, 308}:
+            location = response.getheader("Location")
             if not location:
                 raise ValueError("redirect without location")
-            current = urljoin(current, location)
-            continue
-        return response
-    raise ValueError("too many redirects")
+            return fetch_url_bytes(urljoin(url, location), hops + 1)
+        started = time.monotonic()
+        chunks: list[bytes] = []
+        size = 0
+        while True:
+            if time.monotonic() - started > DEADLINE_SECONDS:
+                raise TimeoutError("deadline")
+            chunk = response.read(65536)
+            if not chunk:
+                break
+            size += len(chunk)
+            if size > MAX_BODY_BYTES:
+                raise ValueError("too large")
+            chunks.append(chunk)
+        return response.status, b"".join(chunks)
+    finally:
+        conn.close()
 
 
 def domain(url: str | None) -> str:
@@ -110,28 +135,13 @@ def parse_when(entry) -> datetime | None:
     return None
 
 
-def read_bounded_body(response: requests.Response) -> bytes:
-    started = time.monotonic()
-    chunks: list[bytes] = []
-    size = 0
-    for chunk in response.iter_content(65536):
-        if time.monotonic() - started > DEADLINE_SECONDS:
-            raise TimeoutError("deadline")
-        size += len(chunk)
-        if size > MAX_BODY_BYTES:
-            raise ValueError("too large")
-        chunks.append(chunk)
-    return b"".join(chunks)
-
-
-def fetch_feed(session: requests.Session, url: str, source: str) -> dict:
+def fetch_feed(url: str, source: str) -> dict:
     result = {"source": source, "url": url, "ok": False, "items": [], "error": None}
     try:
-        with open_public_feed(session, url) as response:
-            if response.status_code >= 400:
-                result["error"] = f"http {response.status_code}"
-                return result
-            body = read_bounded_body(response)
+        status, body = fetch_url_bytes(url)
+        if status >= 400:
+            result["error"] = f"http {status}"
+            return result
         parsed = feedparser.parse(body)
         if parsed.bozo and not parsed.entries:
             result["error"] = "not a feed"
@@ -254,16 +264,11 @@ def main() -> None:
             jobs.append((rss, partner["org"]))
             seen.add(rss)
 
-    session = requests.Session()
-    session.headers.update({"User-Agent": UA})
     stories: list[dict] = []
     failures: list[dict] = []
     ok_urls: set[str] = set()
     with ThreadPoolExecutor(max_workers=16) as pool:
-        futs = {
-            pool.submit(fetch_feed, session, url, name): (url, name)
-            for url, name in jobs
-        }
+        futs = {pool.submit(fetch_feed, url, name): (url, name) for url, name in jobs}
         for fut in as_completed(futs):
             result = fut.result()
             if result["ok"]:
