@@ -4,6 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Around New Jersey · NJ PBS</title>
+<meta name="description" content="Headlines from New Jersey newsrooms, with News Commons partners marked.">
+<meta property="og:title" content="Around New Jersey · NJ PBS">
+<meta property="og:description" content="Headlines from New Jersey newsrooms, with News Commons partners marked.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://centercoopmedia.github.io/around-nj/">
+<meta property="og:image" content="https://njpbs.org/og-default.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Around New Jersey · NJ PBS">
+<meta name="twitter:description" content="Headlines from New Jersey newsrooms, with News Commons partners marked.">
+<meta name="twitter:image" content="https://njpbs.org/og-default.png">
 <link rel="icon" href="brand/pbs-white.svg">
 <style>
 @font-face {
@@ -166,14 +178,14 @@ footer {
     </div>
     <section id="partner-block">
       <h2>Partner headlines</h2>
-      <p class="note">These came from organizations on the NJ PBS invitation list. Duplicate URLs are removed. TAPinto RSS currently returns 403, so that network is not in this snapshot.</p>
+      <p class="note">These came from organizations on the NJ PBS invitation list. Showing {{PARTNER_SHOWN}} of {{PARTNER_COUNT}}. Duplicate URLs are removed. TAPinto RSS currently returns 403, so that network is not in this snapshot.</p>
       <ul class="stories">
 {{PARTNER_ITEMS}}
       </ul>
     </section>
     <section id="other-block">
       <h2>Other New Jersey headlines</h2>
-      <p class="note">Same window, from the existing Daily News Roundup feed list. This is the statewide layer. The partner filter sits on top.</p>
+      <p class="note">Same window, from the existing Daily News Roundup feed list. Showing {{OTHER_SHOWN}} of {{OTHER_COUNT}}. This is the statewide layer. The partner filter sits on top.</p>
       <ul class="stories">
 {{OTHER_ITEMS}}
       </ul>

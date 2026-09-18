@@ -67,7 +67,12 @@ def fetch_feed(session: requests.Session, url: str, source: str) -> dict:
             result["error"] = f"http {response.status_code}"
             return result
         parsed = feedparser.parse(response.content)
-        cutoff = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_HOURS)
+        if parsed.bozo and not parsed.entries:
+            result["error"] = "not a feed"
+            return result
+        now = datetime.now(timezone.utc)
+        cutoff = now - timedelta(hours=LOOKBACK_HOURS)
+        future_limit = now + timedelta(hours=1)
         items = []
         for entry in parsed.entries:
             title = re.sub(r"\s+", " ", (entry.get("title") or "").strip())
@@ -77,7 +82,7 @@ def fetch_feed(session: requests.Session, url: str, source: str) -> dict:
             if urlparse(link).scheme not in ("http", "https"):
                 continue
             when = parse_when(entry)
-            if when is None or when < cutoff:
+            if when is None or when < cutoff or when > future_limit:
                 continue
             items.append(
                 {
@@ -243,8 +248,10 @@ def main() -> None:
 
     html_out = (
         template.replace("{{NOW}}", html.escape(now))
-        .replace("{{PARTNER_COUNT}}", str(len(shown_partners)))
-        .replace("{{OTHER_COUNT}}", str(len(shown_other)))
+        .replace("{{PARTNER_COUNT}}", str(len(partner_stories)))
+        .replace("{{OTHER_COUNT}}", str(len(other_stories)))
+        .replace("{{PARTNER_SHOWN}}", str(len(shown_partners)))
+        .replace("{{OTHER_SHOWN}}", str(len(shown_other)))
         .replace("{{PARTNER_RSS_COUNT}}", str(len(working_partners)))
         .replace("{{PARTNER_TOTAL}}", str(len(partners)))
         .replace("{{DNR_FEED_COUNT}}", str(len(dnr_feeds)))
