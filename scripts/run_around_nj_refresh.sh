@@ -9,6 +9,12 @@ PYTHON="${ROOT}/venv/bin/python"
 LOG_DIR="${ROOT}/logs"
 mkdir -p "$LOG_DIR" drafts
 
+notify() {
+  if command -v jawn-ops >/dev/null 2>&1; then
+    jawn-ops telegram notify --message "$1" || true
+  fi
+}
+
 exec 9>"$LOCK"
 if ! flock -n 9; then
   echo "around-nj refresh already running" >&2
@@ -17,6 +23,7 @@ fi
 
 if [ ! -x "$PYTHON" ]; then
   echo "missing venv python at $PYTHON" >&2
+  notify "Around New Jersey refresh failed: missing venv python at $PYTHON."
   exit 1
 fi
 
@@ -31,11 +38,6 @@ BUILD_ARGS=(--output "$SNAPSHOT")
 if [ "$scrape_status" -eq 0 ] && [ -f "$SCRAPED" ]; then
   BUILD_ARGS+=(--scraped-json "$SCRAPED")
 fi
-notify() {
-  if command -v jawn-ops >/dev/null 2>&1; then
-    jawn-ops telegram notify --message "$1" || true
-  fi
-}
 
 set +e
 "$PYTHON" "${ROOT}/scripts/build_around_nj_demo.py" "${BUILD_ARGS[@]}"
