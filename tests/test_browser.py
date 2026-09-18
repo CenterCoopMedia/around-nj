@@ -242,15 +242,35 @@ class DeskTests(unittest.TestCase):
         self.page.emulate_media(reduced_motion='reduce')
         self.assertEqual(self.page.locator('#theme').evaluate('(el) => getComputedStyle(el).transitionDuration'), '0s')
 
+    def test_native_navigation_links_open_the_requested_view(self):
+        self.page.click('.page-tabs [data-view-link="about"]')
+        url = self.page.get_attribute('.page-tabs [data-view-link="headlines"]', 'href')
+        other = self.context.new_page()
+        other.goto(url)
+        other.locator('.story').first.wait_for()
+        self.assertTrue(other.is_visible('#headlines'))
+        other.close()
+
+    def test_invalid_saved_dates_and_theme_are_nonfatal(self):
+        stories = [{'url': f'https://example.org/old-{i}', 'title': 'Saved headline', 'source': 'Old newsroom', 'day': day, 'timestamp': None, 'when': 'Time not supplied'} for i, day in enumerate(['2026-99-40', '2026-02-31'])]
+        self.page.evaluate('(stories) => { localStorage.setItem("around-nj.saved.v1", JSON.stringify(stories)); localStorage.setItem("around-nj.theme.v1", "corrupted"); }', stories)
+        self.page.reload()
+        self.page.locator('.story').first.wait_for()
+        self.page.click('[data-scope="saved"]')
+        self.assertEqual(self.page.locator('.story').count(), 2)
+        self.assertEqual(self.page.locator('#day option').count(), 1)
+        self.page.emulate_media(color_scheme='dark')
+        self.page.wait_for_function('document.documentElement.dataset.theme === "dark"')
+
     def test_capture_previews(self):
         artifacts = ROOT / 'artifacts'
         artifacts.mkdir(exist_ok=True)
-        self.page.screenshot(path=str(artifacts / 'desktop.png'), full_page=False)
+        self.page.screenshot(path=str(artifacts / 'desktop.png'), full_page=False, animations='disabled')
         self.page.click('#theme')
-        self.page.screenshot(path=str(artifacts / 'desktop-dark.png'), full_page=False)
+        self.page.screenshot(path=str(artifacts / 'desktop-dark.png'), full_page=False, animations='disabled')
         self.page.click('#theme')
         self.page.set_viewport_size({'width': 390, 'height': 1000})
-        self.page.screenshot(path=str(artifacts / 'mobile.png'), full_page=False)
+        self.page.screenshot(path=str(artifacts / 'mobile.png'), full_page=False, animations='disabled')
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

@@ -25,7 +25,10 @@ function loadSaved() {
       if (!value || typeof value !== 'object') continue;
       const url = safeURL(value.url);
       if (!url || typeof value.title !== 'string' || typeof value.source !== 'string') continue;
-      result.set(url, { url, host: host(url), title: value.title.slice(0, 2000), source: value.source.slice(0, 200), partner: value.partner === true, day: /^\d{4}-\d{2}-\d{2}$/.test(value.day) ? value.day : '', timestamp: Number.isFinite(value.timestamp) && value.timestamp >= 0 && value.timestamp < 4102444800000 ? value.timestamp : null, when: typeof value.when === 'string' ? value.when.slice(0, 200) : 'Time not supplied' });
+      const storedDay = typeof value.day === 'string' ? value.day : '';
+      const date = new Date(`${storedDay}T12:00:00Z`);
+      const day = /^\d{4}-\d{2}-\d{2}$/.test(storedDay) && Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === storedDay ? storedDay : '';
+      result.set(url, { url, host: host(url), title: value.title.slice(0, 2000), source: value.source.slice(0, 200), partner: value.partner === true, day, timestamp: Number.isFinite(value.timestamp) && value.timestamp >= 0 && value.timestamp < 4102444800000 ? value.timestamp : null, when: typeof value.when === 'string' ? value.when.slice(0, 200) : 'Time not supplied' });
     }
   } catch { /* A damaged saved list must not prevent reading the snapshot. */ }
   return result;
@@ -49,6 +52,7 @@ function announce(message) {
 }
 const systemTheme = matchMedia('(prefers-color-scheme: dark)');
 let themePreference = storageGet(KEYS.theme);
+if (!['light', 'dark'].includes(themePreference)) themePreference = null;
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
   $('theme').textContent = theme === 'dark' ? 'Light appearance' : 'Dark appearance';
@@ -198,6 +202,12 @@ function renderDirectory() {
 function render() {
   if (!model) return;
   for (const view of ['headlines', 'newsrooms', 'about']) $(view).hidden = view !== state.view;
+  // Keep native open-in-new-tab behavior correct when the current URL has a view filter.
+  document.querySelectorAll('[data-view-link]').forEach(link => {
+    const target = new URL(stateURL({ ...state, view: link.dataset.viewLink }, location.href));
+    target.hash = '';
+    link.href = target.href;
+  });
   document.querySelectorAll('.page-tabs [data-view-link]').forEach(link => {
     if (link.dataset.viewLink === state.view) link.setAttribute('aria-current', 'page');
     else link.removeAttribute('aria-current');
