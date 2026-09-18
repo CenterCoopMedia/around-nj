@@ -12,3 +12,11 @@ def test_story_html_tokens_are_not_rescanned():
         },
     )
     assert html == "start <li>{{COVERAGE_ROWS}}</li> <tr>real</tr> end"
+
+
+def test_unexpected_failures_token_is_substituted():
+    html = render_template(
+        "{{UNEXPECTED_FAILURES}} unexpected",
+        {"{{UNEXPECTED_FAILURES}}": "3"},
+    )
+    assert html == "3 unexpected"

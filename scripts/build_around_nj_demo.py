@@ -674,6 +674,7 @@ def main() -> None:
             "{{PARTNER_RSS_COUNT}}": str(len(working_partners)),
             "{{PARTNER_TOTAL}}": str(len(partners)),
             "{{DNR_FEED_COUNT}}": str(len(dnr_feeds)),
+            "{{UNEXPECTED_FAILURES}}": str(len(unexpected)),
             "{{PARTNER_ITEMS}}": "\n".join(story_li(s, True) for s in shown_partners),
             "{{OTHER_ITEMS}}": "\n".join(story_li(s, False) for s in shown_other),
             "{{COVERAGE_ROWS}}": "".join(rows),
