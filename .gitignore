@@ -40,4 +40,6 @@ logs/
 *.tmp
 *.temp
 drafts/
+logs/
 .cross-model-review-*/
+.firecrawl/

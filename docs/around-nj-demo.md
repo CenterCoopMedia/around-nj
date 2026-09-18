@@ -23,6 +23,21 @@ It uses official NJ PBS marks: the white-and-blue horizontal logo on navy, PBS S
 - Several USA Today network feeds in that file return 404.
 - GitHub Pages is the `gh-pages` branch. Application code stays on `master`.
 
+## Firecrawl fallbacks
+
+Some invitation-list outlets have no RSS, a JavaScript homepage, or a blocked feed (TAPinto 403). Those rows can set `"scrape": "https://..."`. The refresh job uses Firecrawl to extract recent headlines from the homepage and merges them into the snapshot.
+
+Skip Facebook pages, scanners, and outlets with no public homepage for now. Firecrawl is authenticated on officejawn via `FIRECRAWL_API_KEY` / `pass claude/api/firecrawl`.
+
+```bash
+python scripts/scrape_partner_homepages.py --output drafts/scraped_headlines.json
+python scripts/build_around_nj_demo.py \
+  --scraped-json drafts/scraped_headlines.json \
+  --output drafts/snapshot.html
+```
+
+Twice-daily timer (6:30am and 2:00pm Eastern): `deploy/systemd/around-nj-refresh.timer`. It builds locally. Set `AROUND_NJ_PUBLISH=1` on the service to copy `snapshot.html` onto the `gh-pages` worktree. Do not overwrite `index.html`; that file is the news desk. The desk reads `snapshot.html` for headlines.
+
 ## Rebuild
 
 From the repository, with `feedparser` and `requests` installed:
@@ -36,8 +51,8 @@ That command reads `config/rss_feeds.json` and `config/pbs_partners.json`, fetch
 Publish to GitHub Pages from a `gh-pages` checkout that already has `brand/` (official NJ PBS logo and PBS Sans):
 
 ```bash
-cp drafts/around-nj-demo.html /path/to/gh-pages/index.html
-git -C /path/to/gh-pages add index.html
+cp drafts/snapshot.html /path/to/gh-pages/snapshot.html
+git -C /path/to/gh-pages add snapshot.html
 git -C /path/to/gh-pages commit -m "Refresh Around New Jersey snapshot."
 git -C /path/to/gh-pages push origin gh-pages
 ```

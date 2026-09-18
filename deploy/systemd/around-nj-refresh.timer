@@ -1,0 +1,11 @@
+[Unit]
+Description=Around New Jersey refresh at 6:30am and 2:00pm Eastern
+
+[Timer]
+OnCalendar=*-*-* 06:30:00 America/New_York
+OnCalendar=*-*-* 14:00:00 America/New_York
+Persistent=true
+AccuracySec=1min
+
+[Install]
+WantedBy=timers.target

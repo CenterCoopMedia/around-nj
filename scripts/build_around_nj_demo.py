@@ -230,18 +230,41 @@ def norm_name(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", text).strip()
 
 
+def parse_published_text(raw: str) -> datetime | None:
+    text = raw.strip()
+    if not text:
+        return None
+    iso = text.replace("Z", "+00:00")
+    try:
+        dt = datetime.fromisoformat(iso)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=NJ_TZ)
+        return dt.astimezone(timezone.utc)
+    except ValueError:
+        pass
+    try:
+        dt = parsedate_to_datetime(text)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc)
+    except Exception:
+        pass
+    for fmt in ("%Y-%m-%d", "%B %d, %Y", "%b %d, %Y", "%m/%d/%Y"):
+        try:
+            dt = datetime.strptime(text, fmt).replace(tzinfo=NJ_TZ)
+            return dt.astimezone(timezone.utc)
+        except ValueError:
+            continue
+    return None
+
+
 def parse_when(entry) -> datetime | None:
     for key in ("published", "updated"):
         raw = entry.get(key)
-        if not raw:
-            continue
-        try:
-            dt = parsedate_to_datetime(raw)
-            if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=timezone.utc)
-            return dt.astimezone(timezone.utc)
-        except Exception:
-            pass
+        if isinstance(raw, str):
+            parsed = parse_published_text(raw)
+            if parsed is not None:
+                return parsed
     for key in ("published_parsed", "updated_parsed"):
         parsed = entry.get(key)
         if parsed:
@@ -325,19 +348,22 @@ def fetch_feed_bounded(url: str, source: str, partner: bool = False) -> dict:
     )
     proc.start()
     child.close()
-    proc.join(timeout=DEADLINE_SECONDS + 2)
-    if proc.is_alive():
-        proc.terminate()
+    if parent.poll(timeout=DEADLINE_SECONDS + 2):
+        try:
+            result = parent.recv()
+        except (EOFError, OSError):
+            proc.join(1)
+            return {
+                "source": source,
+                "url": url,
+                "ok": False,
+                "items": [],
+                "error": "worker died",
+            }
         proc.join(1)
-        return {
-            "source": source,
-            "url": url,
-            "ok": False,
-            "items": [],
-            "error": "deadline",
-        }
-    if parent.poll():
-        return parent.recv()
+        return result
+    proc.terminate()
+    proc.join(1)
     return {
         "source": source,
         "url": url,
@@ -423,6 +449,10 @@ def main() -> None:
         default=str(ROOT / "drafts" / "around-nj-demo.html"),
         help="HTML output path",
     )
+    parser.add_argument(
+        "--scraped-json",
+        help="Optional Firecrawl homepage scrape output to merge",
+    )
     args = parser.parse_args()
 
     feeds_cfg = json.loads(
@@ -490,12 +520,65 @@ def main() -> None:
             for url, name, partner in jobs
         }
         for fut in as_completed(futs):
-            result = fut.result()
+            url, name = futs[fut]
+            try:
+                result = fut.result()
+            except Exception as exc:
+                failures.append(
+                    {
+                        "source": name,
+                        "url": url,
+                        "ok": False,
+                        "items": [],
+                        "error": type(exc).__name__,
+                    }
+                )
+                continue
             if result["ok"]:
                 ok_urls.add(result["url"])
                 stories.extend(result["items"])
             else:
                 failures.append(result)
+    if args.scraped_json:
+        try:
+            scraped = json.loads(Path(args.scraped_json).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            print(f"ignoring scraped json: {type(exc).__name__}")
+            scraped = {}
+        cutoff = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_HOURS)
+        future_limit = datetime.now(timezone.utc) + timedelta(hours=1)
+        scraped_at = parse_when({"published": scraped.get("generated_at")})
+        if scraped_at is None:
+            scraped_at = datetime.now(timezone.utc)
+        for block in scraped.get("results") or []:
+            org = str(block.get("org") or "Scrape")
+            if block.get("ok") and block.get("url"):
+                ok_urls.add(str(block["url"]))
+            merged = 0
+            dropped = 0
+            for item in block.get("stories") or []:
+                link = valid_story_link(str(item.get("url") or ""))
+                title = " ".join(str(item.get("title") or "").split())
+                if not link or not title:
+                    dropped += 1
+                    continue
+                when = parse_when({"published": item.get("published")})
+                if when is None:
+                    when = scraped_at
+                if when < cutoff or when > future_limit:
+                    dropped += 1
+                    continue
+                stories.append(
+                    {
+                        "title": title,
+                        "url": link,
+                        "when": when.isoformat(),
+                        "source": str(item.get("source") or org),
+                        "partner": True,
+                    }
+                )
+                merged += 1
+            print(f"scrape merge {org}: kept {merged}, dropped {dropped}")
     if failures:
         expected = [
             f

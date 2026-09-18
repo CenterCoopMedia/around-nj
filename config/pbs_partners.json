@@ -77,7 +77,8 @@
     "home": "https://njbmagazine.com",
     "kind": "news",
     "rss": null,
-    "star_domain": null
+    "star_domain": null,
+    "scrape": "https://njbmagazine.com"
   },
   {
     "org": "TAPinto (network)",
@@ -85,7 +86,8 @@
     "home": "https://www.tapinto.net",
     "kind": "news",
     "rss": null,
-    "star_domain": "tapinto.net"
+    "star_domain": "tapinto.net",
+    "scrape": "https://www.tapinto.net"
   },
   {
     "org": "TAPinto Fair Lawn / Glen Rock / Ridgewood / Hawthorne",
@@ -141,7 +143,8 @@
     "home": "https://www.cranfordradio.com",
     "kind": "audio",
     "rss": null,
-    "star_domain": null
+    "star_domain": null,
+    "scrape": "https://www.cranfordradio.com"
   },
   {
     "org": "New Jersey Hills Media Group",
@@ -149,7 +152,8 @@
     "home": "https://www.newjerseyhills.com",
     "kind": "news",
     "rss": null,
-    "star_domain": null
+    "star_domain": null,
+    "scrape": "https://www.newjerseyhills.com"
   },
   {
     "org": "New Jersey Urban News",
@@ -237,7 +241,8 @@
     "home": "https://blackinjersey.com",
     "kind": "news",
     "rss": null,
-    "star_domain": null
+    "star_domain": null,
+    "scrape": "https://blackinjersey.com"
   },
   {
     "org": "Four Oranges",
@@ -245,7 +250,8 @@
     "home": "https://fouroranges.com",
     "kind": "news",
     "rss": null,
-    "star_domain": null
+    "star_domain": null,
+    "scrape": "https://fouroranges.com"
   },
   {
     "org": "Central Desi",
@@ -253,7 +259,8 @@
     "home": "https://centraldesi.com",
     "kind": "news",
     "rss": null,
-    "star_domain": null
+    "star_domain": null,
+    "scrape": "https://centraldesi.com"
   },
   {
     "org": "Central New Jersey Network",
@@ -261,7 +268,8 @@
     "home": "https://www.cnjn.org",
     "kind": "video",
     "rss": null,
-    "star_domain": null
+    "star_domain": null,
+    "scrape": "https://www.cnjn.org"
   },
   {
     "org": "CGNet Swara",

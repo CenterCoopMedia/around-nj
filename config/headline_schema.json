@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "stories": {
+      "type": "array",
+      "description": "Recent news stories, posts, or articles linked from this homepage.",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title": { "type": "string" },
+          "url": { "type": "string" },
+          "published": {
+            "type": "string",
+            "description": "Date or datetime if the page shows one"
+          }
+        },
+        "required": ["title", "url"]
+      }
+    }
+  },
+  "required": ["stories"]
+}
