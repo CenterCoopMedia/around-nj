@@ -8,13 +8,13 @@ import html
 import http.client
 import ipaddress
 import json
+import multiprocessing
 import re
 import socket
 import ssl
 import sys
 import time
-from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
-from concurrent.futures import as_completed
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
@@ -45,7 +45,17 @@ TRACKING_QUERY = {
 UA = "CCM-AroundNJ/0.3 (+https://centerforcooperativemedia.org)"
 MAX_LIST = 80
 MAX_REDIRECTS = 3
-NJ_TZ = ZoneInfo("America/New_York")
+
+
+def load_nj_tz():
+    try:
+        return ZoneInfo("America/New_York")
+    except Exception:
+        # Windows without the IANA database: Eastern Daylight as a last resort.
+        return timezone(timedelta(hours=-4))
+
+
+NJ_TZ = load_nj_tz()
 EXPECTED_FAILURES = (
     ("tapinto.net", "http 403"),
     ("northjersey.com", "http 404"),
@@ -74,16 +84,20 @@ def render_template(template: str, mapping: dict[str, str]) -> str:
 
 def pinned_addrinfo(host: str, port: int):
     infos = socket.getaddrinfo(host, port, type=socket.SOCK_STREAM)
-    chosen = None
+    allowed = []
+    seen = set()
     for family, socktype, proto, _, sockaddr in infos:
         ip = ipaddress.ip_address(sockaddr[0])
         if not ip_is_allowed(ip):
             raise ValueError("blocked host")
-        if chosen is None:
-            chosen = (family, socktype, proto, sockaddr)
-    if chosen is None:
+        key = (family, sockaddr)
+        if key in seen:
+            continue
+        seen.add(key)
+        allowed.append((family, socktype, proto, sockaddr))
+    if not allowed:
         raise ValueError("blocked host")
-    return chosen
+    return allowed
 
 
 def remaining_timeout(deadline: float) -> float:
@@ -104,10 +118,20 @@ def fetch_url_bytes(
     if parsed.scheme not in ("http", "https") or not parsed.hostname:
         raise ValueError("blocked host")
     port = parsed.port or (443 if parsed.scheme == "https" else 80)
-    family, socktype, proto, sockaddr = pinned_addrinfo(parsed.hostname, port)
-    sock = socket.socket(family, socktype, proto)
-    sock.settimeout(remaining_timeout(deadline))
-    sock.connect(sockaddr)
+    last_error: Exception | None = None
+    sock = None
+    for family, socktype, proto, sockaddr in pinned_addrinfo(parsed.hostname, port):
+        candidate = socket.socket(family, socktype, proto)
+        try:
+            candidate.settimeout(remaining_timeout(deadline))
+            candidate.connect(sockaddr)
+            sock = candidate
+            break
+        except OSError as exc:
+            last_error = exc
+            candidate.close()
+    if sock is None:
+        raise last_error or OSError("connection failed")
     sock.settimeout(remaining_timeout(deadline))
     if parsed.scheme == "https":
         ctx = ssl.create_default_context()
@@ -248,6 +272,7 @@ def fetch_feed(url: str, source: str, partner: bool = False) -> dict:
             link = (entry.get("link") or "").strip()
             if not title or not link or is_generic_broadcast(title):
                 continue
+            link = urljoin(url, link)
             if valid_story_link(link) is None:
                 continue
             when = parse_when(entry)
@@ -273,12 +298,37 @@ def fetch_feed(url: str, source: str, partner: bool = False) -> dict:
         return result
 
 
-def fetch_feed_bounded(url: str, source: str, partner: bool = False) -> dict:
-    inner = ThreadPoolExecutor(max_workers=1)
-    fut = inner.submit(fetch_feed, url, source, partner)
+def _fetch_feed_worker(url: str, source: str, partner: bool, conn) -> None:
     try:
-        return fut.result(timeout=DEADLINE_SECONDS + 2)
-    except FuturesTimeout:
+        conn.send(fetch_feed(url, source, partner))
+    except Exception as exc:
+        conn.send(
+            {
+                "source": source,
+                "url": url,
+                "ok": False,
+                "items": [],
+                "error": type(exc).__name__,
+            }
+        )
+    finally:
+        conn.close()
+
+
+def fetch_feed_bounded(url: str, source: str, partner: bool = False) -> dict:
+    ctx = multiprocessing.get_context("spawn")
+    parent, child = ctx.Pipe(duplex=False)
+    proc = ctx.Process(
+        target=_fetch_feed_worker,
+        args=(url, source, partner, child),
+        daemon=True,
+    )
+    proc.start()
+    child.close()
+    proc.join(timeout=DEADLINE_SECONDS + 2)
+    if proc.is_alive():
+        proc.terminate()
+        proc.join(1)
         return {
             "source": source,
             "url": url,
@@ -286,8 +336,15 @@ def fetch_feed_bounded(url: str, source: str, partner: bool = False) -> dict:
             "items": [],
             "error": "deadline",
         }
-    finally:
-        inner.shutdown(wait=False, cancel_futures=True)
+    if parent.poll():
+        return parent.recv()
+    return {
+        "source": source,
+        "url": url,
+        "ok": False,
+        "items": [],
+        "error": "deadline",
+    }
 
 
 def fmt_when(iso: str | None) -> str:
@@ -324,6 +381,24 @@ def story_li(story: dict, partner: bool) -> str:
         f' <span class="src">{html.escape(story["source"])}</span>'
         f' <span class="when">{html.escape(when)}</span></li>'
     )
+
+
+def combine_duplicate(current: dict, story: dict) -> dict:
+    merged_partner = bool(current.get("partner")) or bool(story.get("partner"))
+    newer = (story.get("when") or "") > (current.get("when") or "")
+    keep = dict(story if newer else current)
+    if merged_partner:
+        if story.get("partner") and not current.get("partner"):
+            partner_row = story
+        elif current.get("partner") and not story.get("partner"):
+            partner_row = current
+        else:
+            partner_row = keep
+        keep["source"] = partner_row["source"]
+        keep["partner"] = True
+    else:
+        keep["partner"] = False
+    return keep
 
 
 def is_partner(story: dict, partner_names: set[str]) -> bool:
@@ -451,11 +526,7 @@ def main() -> None:
         if current is None:
             by_key[key] = story
             continue
-        merged_partner = bool(current.get("partner")) or bool(story.get("partner"))
-        newer = (story.get("when") or "") > (current.get("when") or "")
-        keep = story if newer else current
-        keep["partner"] = merged_partner
-        by_key[key] = keep
+        by_key[key] = combine_duplicate(current, story)
     unique = []
     for story in sorted(
         by_key.values(), key=lambda s: s.get("when") or "", reverse=True
