@@ -25,4 +25,21 @@ It uses official NJ PBS marks: the white-and-blue horizontal logo on navy, PBS S
 
 ## Rebuild
 
-The snapshot HTML is generated from Airtable partner coverage plus RSS fetches. Brand assets live on `gh-pages` under `brand/` (logo and PBS Sans). Copy official files from the NJ PBS site brand kit. Do not invent marks.
+From the repository, with `feedparser` and `requests` installed:
+
+```bash
+python scripts/build_around_nj_demo.py --output drafts/around-nj-demo.html
+```
+
+That command reads `config/rss_feeds.json` and `config/pbs_partners.json`, fetches the last 72 hours, and writes branded HTML. It does not need Airtable keys.
+
+Publish to GitHub Pages from a `gh-pages` checkout that already has `brand/` (official NJ PBS logo and PBS Sans):
+
+```bash
+cp drafts/around-nj-demo.html /path/to/gh-pages/index.html
+git -C /path/to/gh-pages add index.html
+git -C /path/to/gh-pages commit -m "Refresh Around New Jersey snapshot."
+git -C /path/to/gh-pages push origin gh-pages
+```
+
+Copy official brand files from the NJ PBS site brand kit into `gh-pages/brand/`. Do not invent marks.

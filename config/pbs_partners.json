@@ -1,0 +1,282 @@
+[
+  {
+    "org": "NJ State House News Service",
+    "invite": "NJ State House News Service",
+    "home": null,
+    "kind": "wire",
+    "rss": null,
+    "star_domain": null
+  },
+  {
+    "org": "Northern New Jersey All Incidents",
+    "invite": "Northern New Jersey All Incidents",
+    "home": null,
+    "kind": "scanner",
+    "rss": null,
+    "star_domain": null
+  },
+  {
+    "org": "Coop Camden",
+    "invite": "Coop Camden / Idea center for the Arts",
+    "home": null,
+    "kind": "community",
+    "rss": null,
+    "star_domain": null
+  },
+  {
+    "org": "KCED / KORISE / Mom&I",
+    "invite": "KCED Foundation Inc. (KORISE/Mom&I)",
+    "home": null,
+    "kind": "ethnic",
+    "rss": null,
+    "star_domain": null
+  },
+  {
+    "org": "Daniel Productions",
+    "invite": "Daniel Productions",
+    "home": null,
+    "kind": "production",
+    "rss": null,
+    "star_domain": null
+  },
+  {
+    "org": "Village Green",
+    "invite": "VillageGreenNJ.com",
+    "home": "https://villagegreennj.com",
+    "kind": "news",
+    "rss": "https://villagegreennj.com/feed/",
+    "star_domain": null
+  },
+  {
+    "org": "Montclair Local",
+    "invite": "Montclair Local Nonprofit News",
+    "home": "https://montclairlocal.news",
+    "kind": "news",
+    "rss": "https://montclairlocal.news/feed/",
+    "star_domain": null
+  },
+  {
+    "org": "New Jersey Monitor",
+    "invite": "New Jersey Monitor",
+    "home": "https://newjerseymonitor.com",
+    "kind": "news",
+    "rss": "https://newjerseymonitor.com/feed/",
+    "star_domain": null
+  },
+  {
+    "org": "Jersey Shore Online",
+    "invite": "Micromedia Publications, Inc. / Jersey Shore Online",
+    "home": "https://www.jerseyshoreonline.com",
+    "kind": "news",
+    "rss": "https://www.jerseyshoreonline.com/feed/",
+    "star_domain": null
+  },
+  {
+    "org": "New Jersey Business Magazine",
+    "invite": "New Jersey Business Magazine",
+    "home": "https://njbmagazine.com",
+    "kind": "news",
+    "rss": null,
+    "star_domain": null
+  },
+  {
+    "org": "TAPinto (network)",
+    "invite": "TAPinto",
+    "home": "https://www.tapinto.net",
+    "kind": "news",
+    "rss": null,
+    "star_domain": "tapinto.net"
+  },
+  {
+    "org": "TAPinto Fair Lawn / Glen Rock / Ridgewood / Hawthorne",
+    "invite": "TAPinto.net Fair Lawn/Glen Rock, Ridgewood, Hawthorne",
+    "home": "https://www.tapinto.net",
+    "kind": "news",
+    "rss": null,
+    "star_domain": "tapinto.net"
+  },
+  {
+    "org": "Hudson County View",
+    "invite": "Hudson County View",
+    "home": "https://hudsoncountyview.com",
+    "kind": "news",
+    "rss": "https://hudsoncountyview.com/feed/",
+    "star_domain": null
+  },
+  {
+    "org": "Heady NJ",
+    "invite": "Heady NJ",
+    "home": "https://headynj.com",
+    "kind": "news",
+    "rss": "https://headynj.com/feed/",
+    "star_domain": null
+  },
+  {
+    "org": "Princeton Perspectives",
+    "invite": "Princeton Perspectives",
+    "home": "https://princetonperspectives.com",
+    "kind": "news",
+    "rss": "https://princetonperspectives.com/feed/",
+    "star_domain": null
+  },
+  {
+    "org": "The Two River Times",
+    "invite": "The Two River Times",
+    "home": "https://www.tworivertimes.com",
+    "kind": "news",
+    "rss": "https://www.tworivertimes.com/feed/",
+    "star_domain": null
+  },
+  {
+    "org": "Trenton Journal",
+    "invite": "Trenton Journal",
+    "home": "https://trentonjournal.com",
+    "kind": "news",
+    "rss": "https://trentonjournal.com/feed/",
+    "star_domain": null
+  },
+  {
+    "org": "Cranford Radio",
+    "invite": "Cranford Radio",
+    "home": "https://www.cranfordradio.com",
+    "kind": "audio",
+    "rss": null,
+    "star_domain": null
+  },
+  {
+    "org": "New Jersey Hills Media Group",
+    "invite": "New Jersey Hills Media Group",
+    "home": "https://www.newjerseyhills.com",
+    "kind": "news",
+    "rss": null,
+    "star_domain": null
+  },
+  {
+    "org": "New Jersey Urban News",
+    "invite": "New Jersey Urban News",
+    "home": "https://www.njurbannews.com",
+    "kind": "news",
+    "rss": "https://www.njurbannews.com/feed/",
+    "star_domain": null
+  },
+  {
+    "org": "State Broadcast News",
+    "invite": "State Broadcast News",
+    "home": "https://www.statebroadcastnews.com",
+    "kind": "audio",
+    "rss": "https://www.statebroadcastnews.com/feed/",
+    "star_domain": null
+  },
+  {
+    "org": "State of the Arts NJ",
+    "invite": "State of the Arts",
+    "home": "https://www.stateoftheartsnj.com",
+    "kind": "video",
+    "rss": "https://stateoftheartsnj.com/feed/",
+    "star_domain": null
+  },
+  {
+    "org": "The Jersey Bee",
+    "invite": "The Jersey Bee",
+    "home": "https://jerseybee.org",
+    "kind": "news",
+    "rss": "https://jerseybee.org/feed/",
+    "star_domain": null
+  },
+  {
+    "org": "Weehawken Gazette",
+    "invite": "Weehawken Gazette",
+    "home": "https://www.weehawkengazette.com",
+    "kind": "news",
+    "rss": "https://www.weehawkengazette.com/feed",
+    "star_domain": null
+  },
+  {
+    "org": "The Woodbury Warbler",
+    "invite": "The Woodbury Warbler",
+    "home": "https://woodburywarbler.com",
+    "kind": "news",
+    "rss": "https://woodburywarbler.com/feed/",
+    "star_domain": null
+  },
+  {
+    "org": "Slice of Culture",
+    "invite": "Slice of Culture",
+    "home": "https://www.sliceofculture.com",
+    "kind": "news",
+    "rss": "https://www.sliceofculture.com/feed/",
+    "star_domain": null
+  },
+  {
+    "org": "HudPost",
+    "invite": "HudPost",
+    "home": "https://hudpost.com",
+    "kind": "news",
+    "rss": "https://hudpost.com/feed/",
+    "star_domain": null
+  },
+  {
+    "org": "Atlantic City Focus",
+    "invite": "Atlantic City Focus",
+    "home": "https://www.atlanticcityfocus.com",
+    "kind": "news",
+    "rss": "https://www.atlanticcityfocus.com/rss/",
+    "star_domain": null
+  },
+  {
+    "org": "Follow South Jersey",
+    "invite": "Follow South Jersey (Follow Local)",
+    "home": "https://followsouthjersey.com",
+    "kind": "news",
+    "rss": "https://followsouthjersey.com/feed/",
+    "star_domain": null
+  },
+  {
+    "org": "Black In Jersey",
+    "invite": "Black In Jersey",
+    "home": "https://blackinjersey.com",
+    "kind": "news",
+    "rss": null,
+    "star_domain": null
+  },
+  {
+    "org": "Four Oranges",
+    "invite": "Four Oranges",
+    "home": "https://fouroranges.com",
+    "kind": "news",
+    "rss": null,
+    "star_domain": null
+  },
+  {
+    "org": "Central Desi",
+    "invite": "Central Desi",
+    "home": "https://centraldesi.com",
+    "kind": "news",
+    "rss": null,
+    "star_domain": null
+  },
+  {
+    "org": "Central New Jersey Network",
+    "invite": "Central New Jersey Network",
+    "home": "https://www.cnjn.org",
+    "kind": "video",
+    "rss": null,
+    "star_domain": null
+  },
+  {
+    "org": "CGNet Swara",
+    "invite": "CGNet Swara",
+    "home": "https://cgnetswara.org",
+    "kind": "other",
+    "rss": "https://cgnetswara.org/podcast.php",
+    "star_domain": null
+  },
+  {
+    "org": "New Jersey Dental Association",
+    "invite": "New Jersey Dental Association",
+    "home": "https://www.njda.org",
+    "kind": "org",
+    "rss": null,
+    "star_domain": null
+  }
+]

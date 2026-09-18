@@ -37,6 +37,12 @@ NJ PBS asked for a browsable daily view of what News Commons partners are report
 - TAPinto town feeds currently return HTTP 403
 - USA Today network RSS URLs in `config/rss_feeds.json` currently return 404
 
+Rebuild:
+
+```bash
+python scripts/build_around_nj_demo.py --output drafts/around-nj-demo.html
+```
+
 See `docs/around-nj-demo.md`.
 
 ## Continuous integration
