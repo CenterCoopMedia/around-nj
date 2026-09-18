@@ -349,7 +349,17 @@ def fetch_feed_bounded(url: str, source: str, partner: bool = False) -> dict:
     proc.start()
     child.close()
     if parent.poll(timeout=DEADLINE_SECONDS + 2):
-        result = parent.recv()
+        try:
+            result = parent.recv()
+        except (EOFError, OSError):
+            proc.join(1)
+            return {
+                "source": source,
+                "url": url,
+                "ok": False,
+                "items": [],
+                "error": "worker died",
+            }
         proc.join(1)
         return result
     proc.terminate()
@@ -510,27 +520,53 @@ def main() -> None:
             for url, name, partner in jobs
         }
         for fut in as_completed(futs):
-            result = fut.result()
+            url, name = futs[fut]
+            try:
+                result = fut.result()
+            except Exception as exc:
+                failures.append(
+                    {
+                        "source": name,
+                        "url": url,
+                        "ok": False,
+                        "items": [],
+                        "error": type(exc).__name__,
+                    }
+                )
+                continue
             if result["ok"]:
                 ok_urls.add(result["url"])
                 stories.extend(result["items"])
             else:
                 failures.append(result)
     if args.scraped_json:
-        scraped = json.loads(Path(args.scraped_json).read_text(encoding="utf-8"))
+        try:
+            scraped = json.loads(Path(args.scraped_json).read_text(encoding="utf-8"))
+        except (OSError, json.JSONDecodeError) as exc:
+            print(f"ignoring scraped json: {type(exc).__name__}")
+            scraped = {}
         cutoff = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_HOURS)
+        future_limit = datetime.now(timezone.utc) + timedelta(hours=1)
+        scraped_at = parse_when({"published": scraped.get("generated_at")})
+        if scraped_at is None:
+            scraped_at = datetime.now(timezone.utc)
         for block in scraped.get("results") or []:
             org = str(block.get("org") or "Scrape")
             if block.get("ok") and block.get("url"):
                 ok_urls.add(str(block["url"]))
+            merged = 0
+            dropped = 0
             for item in block.get("stories") or []:
                 link = valid_story_link(str(item.get("url") or ""))
                 title = " ".join(str(item.get("title") or "").split())
                 if not link or not title:
+                    dropped += 1
                     continue
                 when = parse_when({"published": item.get("published")})
-                future_limit = datetime.now(timezone.utc) + timedelta(hours=1)
-                if when is None or when < cutoff or when > future_limit:
+                if when is None:
+                    when = scraped_at
+                if when < cutoff or when > future_limit:
+                    dropped += 1
                     continue
                 stories.append(
                     {
@@ -541,6 +577,8 @@ def main() -> None:
                         "partner": True,
                     }
                 )
+                merged += 1
+            print(f"scrape merge {org}: kept {merged}, dropped {dropped}")
     if failures:
         expected = [
             f
