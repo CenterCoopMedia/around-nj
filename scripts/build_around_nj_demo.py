@@ -167,7 +167,11 @@ def fetch_feed(url: str, source: str) -> dict:
             link = (entry.get("link") or "").strip()
             if not title or not link or is_generic_broadcast(title):
                 continue
-            if urlparse(link).scheme not in ("http", "https"):
+            try:
+                parsed_link = urlparse(link)
+            except ValueError:
+                continue
+            if parsed_link.scheme not in ("http", "https") or not parsed_link.hostname:
                 continue
             when = parse_when(entry)
             if when is None or when < cutoff or when > future_limit:
@@ -184,7 +188,10 @@ def fetch_feed(url: str, source: str) -> dict:
         result["items"] = items
         return result
     except Exception as exc:
-        result["error"] = type(exc).__name__
+        detail = str(exc).strip().replace("\n", " ")[:120]
+        result["error"] = (
+            f"{type(exc).__name__}: {detail}" if detail else type(exc).__name__
+        )
         return result
 
 
@@ -252,6 +259,7 @@ def main() -> None:
     template = (ROOT / "scripts" / "around_nj_template.html").read_text(
         encoding="utf-8"
     )
+    partners = [p for p in partners if p.get("snapshot") is not False]
 
     dnr_feeds = []
     for items in feeds_cfg.get("feeds", {}).values():
@@ -339,7 +347,7 @@ def main() -> None:
         home_html = (
             f'<a href="{html.escape(home)}">{html.escape(domain(home) or home)}</a>'
             if home
-            else "—"
+            else "none"
         )
         rss_ok = partner.get("rss") in ok_urls
         rows.append(

@@ -1,4 +1,4 @@
-# Around New Jersey (NJ PBS) — agent instructions
+# Around New Jersey (NJ PBS) agent instructions
 
 ## Project overview
 
