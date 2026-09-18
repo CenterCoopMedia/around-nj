@@ -1,381 +1,89 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Around New Jersey · NJ PBS</title>
-<meta name="description" content="Headlines from New Jersey newsrooms, with News Commons partners marked.">
-<meta property="og:title" content="Around New Jersey · NJ PBS">
-<meta property="og:description" content="Headlines from New Jersey newsrooms, with News Commons partners marked.">
-<meta property="og:type" content="website">
-<meta property="og:url" content="https://centercoopmedia.github.io/around-nj/">
-<meta property="og:image" content="https://njpbs.org/og-default.png">
-<meta property="og:image:width" content="1200">
-<meta property="og:image:height" content="630">
-<meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="Around New Jersey · NJ PBS">
-<meta name="twitter:description" content="Headlines from New Jersey newsrooms, with News Commons partners marked.">
-<meta name="twitter:image" content="https://njpbs.org/og-default.png">
-<link rel="icon" href="brand/pbs-white.svg">
-<style>
-@font-face {
-  font-family: "PBS Sans";
-  src: url("brand/fonts/PBSSans.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "PBS Sans";
-  src: url("brand/fonts/PBSSans-Medium.woff2") format("woff2");
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
-@font-face {
-  font-family: "PBS Sans";
-  src: url("brand/fonts/PBSSans-Bold.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-:root {
-  --pbs-blue: #2638c4;
-  --pbs-blue-bright: #4d5ee8;
-  --focus: #aeb7ff;
-  --bg-0: #06070f;
-  --bg-1: #0b0e1d;
-  --bg-2: #131736;
-  --text: #f3f4fb;
-  --text-dim: #c0c5dc;
-  --line: rgba(255, 255, 255, 0.13);
-}
-* { box-sizing: border-box; }
-html { color-scheme: dark; }
-body {
-  margin: 0;
-  font: 17px/1.5 "PBS Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  color: var(--text);
-  background: var(--bg-0);
-}
-a { color: var(--focus); }
-.masthead {
-  background: #0b1f3a;
-  border-bottom: 1px solid var(--line);
-}
-.masthead-inner {
-  max-width: 920px;
-  margin: 0 auto;
-  padding: 16px 24px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-}
-.masthead img { display: block; height: 36px; width: auto; }
-.masthead-meta { color: var(--text-dim); font-size: 0.92rem; }
-main { max-width: 920px; margin: 0 auto; padding: 36px 24px 24px; }
-h1 {
-  font-size: 2.35rem;
-  font-weight: 700;
-  letter-spacing: -0.03em;
-  margin: 0 0 12px;
-}
-.lede { color: var(--text-dim); max-width: 62ch; margin: 0 0 20px; }
-.meta { color: var(--text-dim); font-size: 0.92rem; margin: 0 0 28px; }
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 1px;
-  background: var(--line);
-  border: 1px solid var(--line);
-  margin: 0 0 28px;
-}
-.stat {
-  background: var(--bg-1);
-  padding: 14px 16px;
-}
-.stat b { display: block; font-size: 1.6rem; }
-.stat span { color: var(--text-dim); font-size: 0.88rem; }
-.filters {
-  display: flex;
-  gap: 20px;
-  margin: 0 0 32px;
-  border-bottom: 1px solid var(--line);
-}
-.filters button {
-  appearance: none;
-  background: none;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  color: var(--text-dim);
-  font: inherit;
-  padding: 8px 0 10px;
-  cursor: pointer;
-}
-.filters button[aria-pressed="true"] {
-  color: var(--text);
-  border-bottom-color: var(--pbs-blue-bright);
-}
-h2 { font-size: 1.2rem; font-weight: 700; margin: 36px 0 10px; }
-.note { color: var(--text-dim); font-size: 0.95rem; max-width: 70ch; }
-ul.stories { list-style: none; padding: 0; margin: 0; }
-ul.stories li {
-  padding: 12px 0;
-  border-bottom: 1px solid var(--line);
-}
-ul.stories a {
-  color: var(--text);
-  text-decoration: none;
-  font-weight: 500;
-}
-ul.stories a:hover { text-decoration: underline; }
-.src, .when { color: var(--text-dim); font-weight: 400; font-size: 0.92rem; }
-.src::before { content: " · "; }
-.star {
-  display: inline-block;
-  margin-right: 8px;
-  color: var(--focus);
-  font-size: 0.78rem;
-  font-weight: 700;
-  letter-spacing: 0.02em;
-}
-body.partners-only .is-other,
-body.partners-only #other-block { display: none; }
-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; margin: 12px 0 28px; }
-th, td { text-align: left; padding: 10px 6px; border-bottom: 1px solid var(--line); vertical-align: top; }
-th { font-size: 0.78rem; letter-spacing: 0.04em; text-transform: uppercase; color: var(--text-dim); font-weight: 500; }
-footer {
-  max-width: 920px;
-  margin: 0 auto 64px;
-  padding: 24px;
-  color: var(--text-dim);
-  font-size: 0.9rem;
-  border-top: 1px solid var(--line);
-}
-</style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Browse a snapshot of headlines from New Jersey newsrooms. Search, filter by newsroom, and keep a personal reading list.">
+  <meta property="og:title" content="Around New Jersey · NJ PBS">
+  <meta property="og:description" content="Headlines from New Jersey newsrooms, with News Commons partners marked.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://centercoopmedia.github.io/around-nj/">
+  <meta property="og:image" content="https://njpbs.org/og-default.png">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Around New Jersey · NJ PBS">
+  <meta name="twitter:description" content="Headlines from New Jersey newsrooms, with News Commons partners marked.">
+  <meta name="twitter:image" content="https://njpbs.org/og-default.png">
+  <meta name="color-scheme" content="light dark">
+  <title>Around New Jersey · NJ PBS</title>
+  <link rel="icon" href="brand/pbs-white.svg">
+  <link rel="stylesheet" href="assets/desk.css">
+  <script type="module" src="assets/desk.mjs"></script>
 </head>
 <body>
+  <a class="skip-link" href="#main">Skip to headlines</a>
   <header class="masthead">
-    <div class="masthead-inner">
-      <a href="https://njpbs.org/"><img src="brand/njpbs-horizontal-white.svg" width="146" height="40" alt="NJ PBS"></a>
-      <p class="masthead-meta">NJ PBS News</p>
+    <div class="masthead-inner wrap">
+      <a href="https://njpbs.org/" class="brand"><img src="brand/njpbs-horizontal-white.svg" width="146" height="40" alt="NJ PBS"></a>
+      <span class="masthead-label">News from across the state</span>
+      <button id="theme" type="button" aria-label="Switch to dark appearance">Dark appearance</button>
     </div>
   </header>
-  <main>
-    <h1>Around New Jersey</h1>
-    <p class="lede">Headlines from New Jersey newsrooms, with News Commons partners marked. Built from the Daily News Roundup archive plus the organizations that signed up to work with NJ PBS.</p>
-    <p class="meta">Demo snapshot · Friday, September 18, 2026, 12:01 PM EDT · last 72 hours · not a live product</p>
-    <div class="stats">
-      <div class="stat"><b>96</b><span>Partner headlines</span></div>
-      <div class="stat"><b>294</b><span>Other NJ headlines</span></div>
-      <div class="stat"><b>20</b><span>Partner feeds found</span></div>
-      <div class="stat"><b>67</b><span>Statewide DNR feeds</span></div>
-    </div>
-    <div class="filters" role="group" aria-label="Filter headlines">
-      <button type="button" data-filter="all" aria-pressed="true">All stories</button>
-      <button type="button" data-filter="partners" aria-pressed="false">Partners only</button>
-    </div>
-    <section id="partner-block">
-      <h2>Partner headlines</h2>
-      <p class="note">These came from organizations on the NJ PBS invitation list. Duplicate URLs are removed. TAPinto RSS currently returns 403, so that network is not in this snapshot.</p>
-      <ul class="stories">
-        
-    <li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://montclairlocal.news/2026/09/drink-local-what-were-pouring-at-zeugma-grill/">Drink Local: What We’re Pouring at Zeugma Grill</a> <span class="src">Montclair Local</span> <span class="when">Fri 11:00 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://hudsoncountyview.com/hudson-county-worker-who-alleged-edward-stack-sexually-harassed-her-gets-67-5k/">Hudson County worker who alleged Edward Stack sexually harassed her gets $67.5k</a> <span class="src">Hudson County View</span> <span class="when">Fri 10:59 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://newjerseymonitor.com/2026/09/18/trump-appeal-gateway-tunnel-funding/">Feds drop appeal that sought to block funding for Gateway tunnel project</a> <span class="src">NJ Monitor</span> <span class="when">Fri 10:07 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://njurbannews.com/2026/09/18/tip-t-i-harris-invests-in-pocstock-to-advance-creator-ownership-in-ai/">Tip “T.I.” Harris Invests In pocstock To Advance Creator Ownership In AI</a> <span class="src">New Jersey Urban News</span> <span class="when">Fri 9:30 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://www.jerseyshoreonline.com/toms-river/man-shot-outside-route-37-wawa-in-toms-river-fatal/">One Dead In Shooting Outside Route 37 Toms River Wawa</a> <span class="src">Jersey Shore Online</span> <span class="when">Fri 9:26 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://jerseybee.org/2026/09/18/new-jersey-weekly-sep-18-2026/">New Jersey Weekly: Sep. 18, 2026</a> <span class="src">The Jersey Bee</span> <span class="when">Fri 9:21 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://montclairlocal.news/2026/09/black-students-with-disabilities-are-suspended-at-disproportionate-rates-in-montclair-schools-data-shows/">Black Students with Disabilities are Suspended at Disproportionate Rates in Montclair Schools, Data Shows</a> <span class="src">Montclair Local</span> <span class="when">Fri 9:00 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://villagegreennj.com/community/south-orange-incorporates-feedback-into-revised-valley-street-redevelopment-plan/">South Orange Incorporates Feedback into Revised Valley Street Redevelopment Plan</a> <span class="src">Village Green</span> <span class="when">Fri 8:30 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://trentonjournal.com/continuing-the-discussion-about-downtown-trenton/">Continuing the discussion about Downtown Trenton</a> <span class="src">Trenton Journal</span> <span class="when">Fri 8:29 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://montclairlocal.news/2026/09/montclair-civil-rights-commission-to-host-voting-rights-panel-sept-22/">Montclair Civil Rights Commission to Host Voting Rights Panel Sept. 22</a> <span class="src">Montclair Local</span> <span class="when">Fri 8:00 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://montclairlocal.news/2026/09/montclair-field-hockey-building-in-26-as-season-turns-to-tournaments/">Montclair Field Hockey Building in ’26 as Season Turns to Tournaments</a> <span class="src">Montclair Local</span> <span class="when">Fri 7:17 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://newjerseymonitor.com/2026/09/18/shellfish-farmers-warn-overregulation-could-drive-nj-aquaculture-to-extinction/">Shellfish farmers warn overregulation could drive NJ aquaculture to ‘extinction’</a> <span class="src">NJ Monitor</span> <span class="when">Fri 6:42 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://www.atlanticcityfocus.com/live-saturday-night-the-light-after-dark-explores-reiki-hip-hop-community-service-and-aging-r-b-legends/">Live Saturday Night: The Light After Dark Explores Reiki, Hip-Hop, Community Service and Aging R&amp;B Legends</a> <span class="src">Atlantic City Focus</span> <span class="when">Fri 6:37 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://villagegreennj.com/election/video-transcript-board-of-ed-candidates-discuss-integration-artificial-turf-opportunity-gap-more/">VIDEO, TRANSCRIPT: Board of Ed Candidates Discuss Integration, Artificial Turf, Opportunity Gap, More</a> <span class="src">Village Green</span> <span class="when">Thu 11:57 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://hudsoncountyview.com/stevens-clarks-scholars-students-give-25k-to-hoboken-volunteer-ambulance-corps/">Stevens Clarks Scholars students give $25k to Hoboken Volunteer Ambulance Corps</a> <span class="src">Hudson County View</span> <span class="when">Thu 6:13 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://newjerseymonitor.com/2026/09/17/repub/school-violence-rises/">Violent victimization at school rose among students in 2024, federal data show</a> <span class="src">NJ Monitor</span> <span class="when">Thu 5:58 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://headynj.com/dispensary/the-problem-of-overvaluing-thc-in-the-nj-cannabis-market/">The Problem of Overvaluing THC in the NJ Cannabis Market</a> <span class="src">Heady NJ</span> <span class="when">Thu 5:43 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://hudsoncountyview.com/hoboken-council-takes-1st-step-to-repeal-sound-permits-for-waterfront-businesses/">Hoboken council takes 1st step to repeal sound permits for waterfront businesses</a> <span class="src">Hudson County View</span> <span class="when">Thu 5:39 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://montclairlocal.news/2026/09/montclair-in-talks-with-pseg-for-electric-substation-at-municipal-building-site/">Montclair in Talks With PSE&amp;G For Electric Substation at Municipal Building Site</a> <span class="src">Montclair Local</span> <span class="when">Thu 5:05 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://hudsoncountyview.com/hoboken-city-council-rejects-extending-bar-hours-for-major-sporting-events/">Hoboken City Council rejects extending bar hours ‘for major sporting events’</a> <span class="src">Hudson County View</span> <span class="when">Thu 4:40 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://headynj.com/cannabis-events/the-retreat-dispensary-launches-terpene-talk-education-program/">The Retreat Dispensary Launches Terpene Talk Education Program</a> <span class="src">Heady NJ</span> <span class="when">Thu 4:40 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://headynj.com/industry/smiling-bud-cannabis-manufacturing-workers-vote-to-join-ufcw-local-360-union/">Smiling Bud Cannabis Manufacturing Workers Vote to Join UFCW Local 360 Union</a> <span class="src">Heady NJ</span> <span class="when">Thu 4:38 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://www.jerseyshoreonline.com/southern-ocean/meth-coke-found-during-traffic-stop/">Meth, Coke Found During Traffic Stop</a> <span class="src">Jersey Shore Online</span> <span class="when">Thu 3:38 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://trentonjournal.com/35000-taco-bell-foundation-grant-expands-opportunities-for-mercer-county-youth/">$35,000 Taco Bell Foundation Grant expands opportunities for Mercer County Youth</a> <span class="src">Trenton Journal</span> <span class="when">Thu 3:26 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://www.jerseyshoreonline.com/manchester/former-gymnastics-coach-convicted-of-sex-crimes/">Former Gymnastics Coach Convicted Of Sex Crimes</a> <span class="src">Jersey Shore Online</span> <span class="when">Thu 3:06 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://hudsoncountyview.com/njwfp-bhalla-brennan-hosting-hoboken-fundraiser-for-u-s-rep-mejia-tomorrow/">NJWFP, Bhalla, &amp; Brennan hosting Hoboken fundraiser for U.S. Rep. Mejia tomorrow</a> <span class="src">Hudson County View</span> <span class="when">Thu 2:53 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://hudsoncountyview.com/union-citys-top-cop-takes-stand-in-estrella-trial-as-stack-dismissal-gains-steam/">Union City’s top cop takes stand in Estrella trial as Stack dismissal gains steam</a> <span class="src">Hudson County View</span> <span class="when">Thu 2:09 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://jerseybee.org/2026/09/17/irvington-daily-buzz-sep-17-2026/">Irvington Daily Buzz: Sep. 17, 2026</a> <span class="src">The Jersey Bee</span> <span class="when">Thu 2:07 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://jerseybee.org/2026/09/17/east-orange-daily-buzz-sep-17-2026/">East Orange Daily Buzz: Sep. 17, 2026</a> <span class="src">The Jersey Bee</span> <span class="when">Thu 2:05 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://jerseybee.org/2026/09/17/essex-county-daily-buzz-sep-17-2026/">Essex County Daily Buzz: Sep. 17, 2026</a> <span class="src">The Jersey Bee</span> <span class="when">Thu 2:01 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://jerseybee.org/2026/09/17/west-orange-daily-buzz-sep-17-2026/">West Orange Daily Buzz: Sep. 17, 2026</a> <span class="src">The Jersey Bee</span> <span class="when">Thu 1:54 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://jerseybee.org/2026/09/17/south-orange-daily-buzz-sep-17-2026/">South Orange Daily Buzz: Sep. 17, 2026</a> <span class="src">The Jersey Bee</span> <span class="when">Thu 1:52 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://jerseybee.org/2026/09/17/orange-daily-buzz-sep-17-2026/">Orange Daily Buzz: Sep. 17, 2026</a> <span class="src">The Jersey Bee</span> <span class="when">Thu 1:51 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://jerseybee.org/2026/09/17/nutley-daily-buzz-sep-17-2026/">Nutley Daily Buzz: Sep. 17, 2026</a> <span class="src">The Jersey Bee</span> <span class="when">Thu 1:49 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://jerseybee.org/2026/09/17/newark-daily-buzz-sep-17-2026/">Newark Daily Buzz: Sep. 17, 2026</a> <span class="src">The Jersey Bee</span> <span class="when">Thu 1:48 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://jerseybee.org/2026/09/17/montclair-daily-buzz-sep-17-2026/">Montclair Daily Buzz: Sep. 17, 2026</a> <span class="src">The Jersey Bee</span> <span class="when">Thu 1:47 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://montclairlocal.news/2026/09/montclairvoyant-the-news-isnt-nice-and-that-includes-ice/">MontClairVoyant: The News Isn’t Nice, and That Includes ICE</a> <span class="src">Montclair Local</span> <span class="when">Thu 1:30 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://www.jerseyshoreonline.com/southern-ocean/guns-found-after-route-539-crash-additional-charges/">Guns Found After Route 539 Crash, Additional Charges</a> <span class="src">Jersey Shore Online</span> <span class="when">Thu 1:17 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://montclairlocal.news/2026/09/2026-montclair-film-festival-honorees/">Ava DuVernay, Tony Gilroy, Jack O’Connell to Receive 2026 Montclair Film Festival Honors</a> <span class="src">Montclair Local</span> <span class="when">Thu 1:00 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://headynj.com/dispensary/authorized-dealer-dispensary-opens-in-north-bergen-by-walmart/">Authorized Dealer Dispensary Opens in North Bergen by Walmart</a> <span class="src">Heady NJ</span> <span class="when">Thu 12:03 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://njurbannews.com/2026/09/17/dawn-treader-christian-school-nears-50-years-of-faith-education-and-community-in-paterson/">Dawn Treader Christian School Nears 50 Years of Faith, Education, and Community in Paterson</a> <span class="src">New Jersey Urban News</span> <span class="when">Thu 12:00 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://villagegreennj.com/community/after-spring-protests-of-citizens-bank-and-an-rfp-south-orange-votes-to-switch-to-metropolitan-commercial/">After Spring Protests of Citizens Bank and an RFP, South Orange Votes to Switch to Metropolitan Commercial</a> <span class="src">Village Green</span> <span class="when">Thu 11:43 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://www.jerseyshoreonline.com/jackson/mayoral-intern-working-on-veterans-projects/">Mayoral Intern Working On Veterans Projects</a> <span class="src">Jersey Shore Online</span> <span class="when">Thu 11:06 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://hudsoncountyview.com/hoboken-city-council-votes-7-2-to-approve-11-19m-bond-for-various-projects/">Hoboken City Council votes 7-2 to approve $11.19M bond for various projects</a> <span class="src">Hudson County View</span> <span class="when">Thu 11:04 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://montclairlocal.news/2026/09/69-forest-avenue-glen-ridge-home/">A Glen Ridge Home With NYC Views, Historic Details and a Backyard Retreat (Sponsored)</a> <span class="src">Montclair Local</span> <span class="when">Thu 11:00 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://njurbannews.com/2026/09/17/let-the-people-who-were-there-be-heard/">Let The People Who Were There Be Heard!</a> <span class="src">New Jersey Urban News</span> <span class="when">Thu 11:00 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://www.jerseyshoreonline.com/berkeley/fire-company-receives-grant-for-gear/">Fire Company Receives Grant For Gear</a> <span class="src">Jersey Shore Online</span> <span class="when">Thu 10:59 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://www.jerseyshoreonline.com/manchester/school-supply-donations-start-the-year-off-strong/">School Supply Donations Start The Year Off Strong</a> <span class="src">Jersey Shore Online</span> <span class="when">Thu 10:35 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://villagegreennj.com/towns/maplewood/maplewoods-rob-nelson-named-anchor-of-new-nj-pbs-daily-newscast/">Maplewood’s Rob Nelson Named Anchor of New NJ PBS Daily Newscast</a> <span class="src">Village Green</span> <span class="when">Thu 10:10 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://njurbannews.com/2026/09/17/esto-es-lo-que-mas-urge-cambiar-en-las-escuelas-de-nueva-jersey-dice-la-nueva-jefa-de-educacion/">Esto es lo que más urge cambiar en las escuelas de Nueva Jersey, dice la nueva jefa de educación</a> <span class="src">New Jersey Urban News</span> <span class="when">Thu 10:00 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://montclairlocal.news/2026/09/wallet-reported-stolen-on-church-street-in-montclair-tracked-to-newark-police-say/">Wallet Reported Stolen on Church Street in Montclair Tracked to Newark, Police Say</a> <span class="src">Montclair Local</span> <span class="when">Thu 9:00 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://montclairlocal.news/2026/09/barktoberfest-pet-adoption-west-orange-2026/">BARKtoberfest Returns to West Orange for 10th Annual Pet Adoption Event</a> <span class="src">Montclair Local</span> <span class="when">Thu 8:00 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://villagegreennj.com/obituaries/peter-horoschak-86-former-south-orange-maplewood-schools-superintendent/">Peter Horoschak, 86, Former South Orange-Maplewood Schools Superintendent</a> <span class="src">Village Green</span> <span class="when">Thu 7:21 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://villagegreennj.com/arts/music-for-kids-resumes-at-the-maplewood-library-september-19/">Music For Kids Resumes at the Maplewood Library September 19</a> <span class="src">Village Green</span> <span class="when">Thu 7:21 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://www.atlanticcityfocus.com/third-week-of-september-17th-20th/">THIRD WEEK OF SEPTEMBER</a> <span class="src">Atlantic City Focus</span> <span class="when">Thu 6:00 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://newjerseymonitor.com/2026/09/17/nj-police-ai-regulations/">As police increasingly embrace AI, some wait for regulations and proof it works</a> <span class="src">NJ Monitor</span> <span class="when">Thu 5:56 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://newjerseymonitor.com/2026/09/17/nj-auditor-report-nursing-homes/">NJ auditor’s report shows why we need greater nursing home transparency</a> <span class="src">NJ Monitor</span> <span class="when">Thu 5:44 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://hudsoncountyview.com/city-of-hoboken-announces-musical-lineup-for-river-city-fair-on-sept-26/">City of Hoboken announces musical lineup for River City Fair on Sept. 26</a> <span class="src">Hudson County View</span> <span class="when">Wed 5:58 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://trentonjournal.com/childrens-home-society-of-nj-to-welcome-public-to-trenton-mayoral-forum/">Children’s Home Society of NJ to Welcome Public to Trenton Mayoral Forum</a> <span class="src">Trenton Journal</span> <span class="when">Wed 5:27 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://headynj.com/politics/nj-bills-introduced-to-keep-shroom-and-weed-edibles-from-kids/">NJ Bills Introduced to Keep Shroom and Weed Edibles from Kids</a> <span class="src">Heady NJ</span> <span class="when">Wed 5:03 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://newjerseymonitor.com/2026/09/16/roxbury-warehouse-ice-detention/">Roxbury warehouse again at center of ICE detention fight</a> <span class="src">NJ Monitor</span> <span class="when">Wed 4:50 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://www.jerseyshoreonline.com/toms-river/manchester-man-sentenced-in-toms-river-shooting/">Manchester Man Sentenced In Toms River Shooting</a> <span class="src">Jersey Shore Online</span> <span class="when">Wed 4:28 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://newjerseymonitor.com/2026/09/16/repub/fed-raises-interest-rates/">Fed raises interest rates for first time in 3 years, battling persistent inflation</a> <span class="src">NJ Monitor</span> <span class="when">Wed 4:23 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://hudsoncountyview.com/hudson-county-to-host-annual-business-resource-summit-at-hccc-tomorrow/">Hudson County to host annual Business Resource Summit at HCCC tomorrow</a> <span class="src">Hudson County View</span> <span class="when">Wed 4:20 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://hudsoncountyview.com/union-citys-joe-botti-achieves-usa-boxing-gold-level-coach-certification/">Union City’s Joe Botti achieves USA Boxing Gold Level Coach certification</a> <span class="src">Hudson County View</span> <span class="when">Wed 4:04 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://www.jerseyshoreonline.com/toms-river/schools-start-internet-ban-in-age-of-smart-glasses/">Schools Start Internet Ban In Age Of Smart Glasses</a> <span class="src">Jersey Shore Online</span> <span class="when">Wed 3:42 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://newjerseymonitor.com/2026/09/16/judge-dismisses-nj-school-board-member-free-speech-lawsuit/">Judge dismisses NJ school board member’s free speech lawsuit</a> <span class="src">NJ Monitor</span> <span class="when">Wed 3:40 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://www.jerseyshoreonline.com/monmouth-county/ymca-plans-free-wellness-open-house/">YMCA Plans Free Wellness Open House</a> <span class="src">Jersey Shore Online</span> <span class="when">Wed 1:02 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://newjerseymonitor.com/2026/09/16/repub/trump-homelessness-grants-addiction/">Trump admin aims to shift homelessness grants toward addiction treatment, enforcement</a> <span class="src">NJ Monitor</span> <span class="when">Wed 12:55 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://www.jerseyshoreonline.com/southern-ocean/local-man-charged-after-meth-found-at-park/">Local Man Charged After Meth Found At Park</a> <span class="src">Jersey Shore Online</span> <span class="when">Wed 12:39 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://njurbannews.com/2026/09/16/heres-why-so-many-school-teachers-and-aides-are-getting-laid-off-in-nj/">Here’s Why So Many School Teachers And Aides Are Getting Laid Off In NJ</a> <span class="src">New Jersey Urban News</span> <span class="when">Wed 12:00 PM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://villagegreennj.com/infrastructure/gas-main-replacement-to-snarl-traffic-on-south-orange-ave-workers-will-pause-during-school-drop-off-dismissal/">Gas Main Replacement to Snarl Traffic on South Orange Ave; Workers Will Pause During School Drop Off, Dismissal</a> <span class="src">Village Green</span> <span class="when">Wed 11:30 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://www.jerseyshoreonline.com/southern-ocean/ocean-county-woman-seeks-lesser-charge-in-child-sex-abuse-case/">Ocean County Woman Seeks Lesser Charge In Child Sex Abuse Case</a> <span class="src">Jersey Shore Online</span> <span class="when">Wed 10:35 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://njurbannews.com/2026/09/16/statewide-homeless-veterans-initiative-achieves-milestone/">Statewide Homeless Veterans Initiative Achieves Milestone</a> <span class="src">New Jersey Urban News</span> <span class="when">Wed 10:00 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://www.jerseyshoreonline.com/berkeley/childhood-cancer-awareness-month-recognized/">Childhood Cancer Awareness Month Recognized</a> <span class="src">Jersey Shore Online</span> <span class="when">Wed 9:39 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://villagegreennj.com/police-and-fire/maplewood-middle-principal-student-not-in-crosswalk-was-struck-by-vehicle-at-dismissal-on-tuesday/">Maplewood Middle Principal: Student Not in Crosswalk Was Struck by Vehicle at Dismissal on Tuesday</a> <span class="src">Village Green</span> <span class="when">Wed 9:00 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://princetonperspectives.com/editors-note-motion/">Editor’s Note</a> <span class="src">Princeton Perspectives</span> <span class="when">Wed 8:30 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://princetonperspectives.com/the-pulse-of-princeton-what-would-you-like-to-see-change-or-what-should-stay-as-it-is/">The Pulse of Princeton – What would you like to see change, or what should stay as it is?</a> <span class="src">Princeton Perspectives</span> <span class="when">Wed 8:23 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://villagegreennj.com/obituaries/christiana-a-lewis-lived-a-llife-of-quiet-devotion/">Christiana A. Lewis Lived A Life of Quiet Devotion</a> <span class="src">Village Green</span> <span class="when">Wed 8:16 AM</span></li>
-<li class="is-partner"><span class="star" title="News Commons partner">Partner</span><a href="https://princetonperspectives.com/the-leader-of-new-jersey-is-your-new-neighbor/">The Leader of New Jersey is Your New Neighbor</a> <span class="src">Princeton Perspectives</span> <span class="when">Wed 8:11 AM</span></li>
-  
-      </ul>
+  <main id="main" class="wrap" tabindex="-1">
+    <section class="intro" aria-labelledby="page-title">
+      <div><p class="kicker">The local news desk</p><h1 id="page-title">Around New Jersey</h1><p class="lede">Headlines from New Jersey newsrooms. Search, save, and read at the source.</p></div>
+      <div class="snapshot-stamp"><span class="stamp-label">Demo snapshot — not live</span><p id="snapshot-date">Reading snapshot details…</p><a href="#about" data-view-link="about">What’s included <span aria-hidden="true">↗</span></a></div>
     </section>
-    <section id="other-block">
-      <h2>Other New Jersey headlines</h2>
-      <p class="note">Same window, from the existing Daily News Roundup feed list. This is the statewide layer. The partner filter sits on top.</p>
-      <ul class="stories">
-        
-    <li class="is-other"><a href="https://www.nj.com/entertainment/2026/09/beloved-actress-opens-up-about-eating-disorder-battle-didnt-know-if-i-would-make-it.html">Beloved actress opens up about eating disorder battle: ‘Didn’t know if I would make it’</a> <span class="src">NJ.com</span> <span class="when">Fri 11:02 AM</span></li>
-<li class="is-other"><a href="https://gothamist.com/news/are-teslas-cybercabs-racing-past-nyc-regulators">Are Tesla’s Cybercabs racing past NYC regulators?</a> <span class="src">WNYC/Gothamist</span> <span class="when">Fri 11:00 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/business/2026/09/new-shoprite-opening-in-nj-riverfront-town-replacing-acme-that-closed-and-laid-off-workers.html">New ShopRite opening in N.J. riverfront town, replacing Acme that closed and laid off workers</a> <span class="src">NJ.com</span> <span class="when">Fri 11:00 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/advice/2026/09/dear-annie-i-could-just-opt-out-of-family-group-chat-but-should-i-school-my-cousin-first.html">Dear Annie: I could just opt out of family group chat, but should I school my cousin first?</a> <span class="src">NJ.com</span> <span class="when">Fri 11:00 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/news/2026/09/duct-taped-passenger-reveals-what-he-drank-before-outburst-on-plane.html">Duct-taped passenger reveals what he drank before outburst on plane</a> <span class="src">NJ.com</span> <span class="when">Fri 10:57 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/entertainment/2026/09/popular-90s-rock-musician-dead-at-56-the-world-has-lost-a-singular-talent.html">Popular ’90s rock musician dead at 56: ‘The world has lost a singular talent’</a> <span class="src">NJ.com</span> <span class="when">Fri 10:56 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/ocean/2026/09/fatal-shooting-outside-nj-wawa-leaves-police-searching-for-a-suspect.html">Fatal shooting outside N.J. Wawa leaves police searching for a suspect</a> <span class="src">NJ.com</span> <span class="when">Fri 10:55 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/super-essex-conference-boys-soccer-season-stats-leaders-for-sept-18.html">Super Essex Conference boys soccer season stats leaders for Sept. 18</a> <span class="src">NJ.com</span> <span class="when">Fri 10:53 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/giants/2026/09/giants-john-harbaugh-assures-benched-player-he-is-not-in-the-doghouse.html">Giants’ John Harbaugh assures benched player he is not ‘in the doghouse’</a> <span class="src">NJ.com</span> <span class="when">Fri 10:51 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/entertainment/2026/09/popular-rock-singer-asks-for-prayers-from-hospital-bed-friends-i-have-cancer.html">Popular rock singer asks for prayers from hospital bed: ‘Friends, I have cancer’</a> <span class="src">NJ.com</span> <span class="when">Fri 10:49 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/entertainment/2026/09/american-idol-star-recalls-being-outed-on-live-tv-i-died-inside.html">‘American Idol’ star recalls being outed on live TV</a> <span class="src">NJ.com</span> <span class="when">Fri 10:49 AM</span></li>
-<li class="is-other"><a href="https://www.cbsnews.com/newyork/news/flash-flooding-possible-this-weekend-in-nyc/">Sunday weather in and around NYC will bring rain and possible flash flooding. Get the forecast</a> <span class="src">CBS New York</span> <span class="when">Fri 10:48 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/news/2026/09/an-suv-plowed-into-an-apple-store-killing-a-nj-man-now-the-driver-will-stand-trial-for-murder.html">An SUV plowed into an Apple Store, killing a N.J. man. Now the case is going to trial</a> <span class="src">NJ.com</span> <span class="when">Fri 10:48 AM</span></li>
-<li class="is-other"><a href="https://www.roi-nj.com/2026/09/18/politics/njhmfa-greenlights-funding-for-bridgeton-phoenix-senior-village/">NJHMFA greenlights funding for Bridgeton Phoenix Senior Village</a> <span class="src">ROI-NJ</span> <span class="when">Fri 10:48 AM</span></li>
-<li class="is-other"><a href="https://www.cbsnews.com/newyork/news/warren-buffett-stepping-aside-berkshire-hathaway-chairman/">Warren Buffett stepping aside as Berkshire Hathaway chairman</a> <span class="src">CBS New York</span> <span class="when">Fri 10:48 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/north-jersey-interscholastic-conference-boys-soccer-season-stats-leaders-for-sept-18.html">North Jersey Interscholastic Conference boys soccer season stats leaders for Sept. 18</a> <span class="src">NJ.com</span> <span class="when">Fri 10:47 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/realestate-news/2026/09/10-most-expensive-homes-sold-in-sussex-county-sept-7-13.html">10 most expensive homes sold in Sussex County, Sept. 7-13</a> <span class="src">NJ.com</span> <span class="when">Fri 10:46 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/news/2026/09/warren-buffett-steps-down-as-berkshire-hathaway-chairman-replacement-named.html">Warren Buffett steps down as Berkshire Hathaway chairman; replacement named</a> <span class="src">NJ.com</span> <span class="when">Fri 10:43 AM</span></li>
-<li class="is-other"><a href="https://gothamist.com/news/nyc-inches-closer-to-creating-land-bank-for-tax-debts-and-seized-properties">NYC inches closer to creating &#x27;land bank&#x27; for tax debts and seized properties</a> <span class="src">WNYC/Gothamist</span> <span class="when">Fri 10:38 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/field-hockey-results-and-recaps-for-friday-sept-18.html">Field Hockey: Results and recaps for Friday, Sept. 18</a> <span class="src">NJ.com</span> <span class="when">Fri 10:35 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/news/2026/09/huge-burger-chain-franchisee-files-for-bankruptcy.html">Huge burger chain franchisee files for bankruptcy</a> <span class="src">NJ.com</span> <span class="when">Fri 10:35 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/daily-girls-soccer-stat-leaders-for-thursday-sept-17.html">Daily girls soccer stat leaders for Thursday, Sept. 17</a> <span class="src">NJ.com</span> <span class="when">Fri 10:35 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/northwest-jersey-athletic-conference-boys-soccer-season-stats-leaders-for-sept-18.html">Northwest Jersey Athletic Conference boys soccer season stats leaders for Sept. 18</a> <span class="src">NJ.com</span> <span class="when">Fri 10:30 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/business/2026/09/kroger-is-no-longer-stocking-red-bull-and-the-reason-may-surprise-you.html">Kroger is no longer stocking Red Bull and the reason may surprise you</a> <span class="src">NJ.com</span> <span class="when">Fri 10:29 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/news/2026/09/84k-melissa-doug-toys-sold-by-retailers-nationwide-recalled-over-choking-risks.html">Melissa &amp; Doug recalls 84K fire truck toys over choking risk</a> <span class="src">NJ.com</span> <span class="when">Fri 10:29 AM</span></li>
-<li class="is-other"><a href="https://www.cbsnews.com/newyork/news/wawa-shooting-deadly-toms-river-new-jersey/">Deadly shooting in Wawa parking lot in Toms River, N.J. under investigation, prosecutors say</a> <span class="src">CBS New York</span> <span class="when">Fri 10:27 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/girls-tennis-group-conference-rankings-sept-18.html">Girls tennis group &amp; conference rankings, Sept. 18</a> <span class="src">NJ.com</span> <span class="when">Fri 10:26 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/entertainment/2026/09/pioneering-rapper-dies-at-44.html">Pioneering rapper who mentored Ed Sheeran dies at 44</a> <span class="src">NJ.com</span> <span class="when">Fri 10:24 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/union/2026/09/pedestrian-killed-crossing-against-light-in-nj-city-driver-returned-to-approach-police.html">Pedestrian killed crossing against light in N.J. city, driver returned to approach police</a> <span class="src">NJ.com</span> <span class="when">Fri 10:23 AM</span></li>
-<li class="is-other"><a href="https://www.roi-nj.com/2026/09/18/industry/njdol-provides-3m-in-pre-apprenticeship-grant-funding-to-create-roads-to-careers/">NJDOL provides $3M in pre-apprenticeship grant funding to create roads to careers</a> <span class="src">ROI-NJ</span> <span class="when">Fri 10:22 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/realestate-news/2026/09/10-most-expensive-homes-sold-in-cape-may-county-sept-7-13.html">10 most expensive homes sold in Cape May County, Sept. 7-13</a> <span class="src">NJ.com</span> <span class="when">Fri 10:16 AM</span></li>
-<li class="is-other"><a href="https://jerseydigs.com/fall-hiring-picks-7-new-jersey-jobs-to-know-about-this-week/">Fall Hiring Picks: 7 New Jersey Jobs to Know About This Week</a> <span class="src">Jersey Digs</span> <span class="when">Fri 10:15 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/hcial-boys-soccer-season-stats-leaders-for-sept-18.html">HCIAL boys soccer season stats leaders for Sept. 18</a> <span class="src">NJ.com</span> <span class="when">Fri 10:13 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/politics/2026/09/trump-issues-brutal-2-word-reply-to-ex-insider-praying-for-him.html">Trump gives brutal 2-word reply to ex-insider praying for him</a> <span class="src">NJ.com</span> <span class="when">Fri 10:08 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/group-3-boys-soccer-stat-leaders-for-friday-sept-18.html">Group 3 boys soccer stat leaders for Friday, Sept. 18</a> <span class="src">NJ.com</span> <span class="when">Fri 10:07 AM</span></li>
-<li class="is-other"><a href="https://gothamist.com/news/data-center-company-that-spilled-fuel-into-the-meadowlands-plans-another-center-next-door">Data center company that spilled fuel into the Meadowlands plans another center next door</a> <span class="src">WNYC/Gothamist</span> <span class="when">Fri 10:06 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/big-north-conference-boys-soccer-season-stats-leaders-for-sept-18.html">Big North Conference boys soccer season stats leaders for Sept. 18</a> <span class="src">NJ.com</span> <span class="when">Fri 10:05 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/live-entertainment/2026/09/seahearnow-is-kicking-off-this-weekend-on-sept-19-heres-how-to-snag-last-minute-tickets.html">Sea.Hear.Now is kicking off this weekend on Sept. 19. Here’s how to snag last-minute tickets</a> <span class="src">NJ.com</span> <span class="when">Fri 10:05 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/news/2026/09/these-popular-90s-baby-names-are-fading-faster-than-you-might-think.html">These names ruled the ’90s. Now parents are leaving them behind</a> <span class="src">NJ.com</span> <span class="when">Fri 10:01 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/business/2026/09/upscale-nj-housing-complex-opens-with-free-rent-incentives-and-rooftop-views.html">Upscale housing complex opens in Bergen County with free rent incentives and rooftop views</a> <span class="src">NJ.com</span> <span class="when">Fri 10:00 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/betting/2026/09/polymarket-promo-code-njcom-get-up-to-50-to-trade-cfb-games-this-weekend.html">Polymarket promo code NJCOM: Get up to $50 to trade CFB games this weekend</a> <span class="src">NJ.com</span> <span class="when">Fri 10:00 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/non-public-boys-soccer-stat-leaders-for-friday-sept-18.html">Non-Public boys soccer stat leaders for Friday, Sept. 18</a> <span class="src">NJ.com</span> <span class="when">Fri 9:56 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/politics/2026/09/trump-brutally-mocked-after-bizarre-helipad-claim-everybody-loves-it.html">Trump brutally mocked after bizarre helipad claim: ‘Everybody loves it’</a> <span class="src">NJ.com</span> <span class="when">Fri 9:56 AM</span></li>
-<li class="is-other"><a href="https://www.roi-nj.com/2026/09/18/real_estate_development/corebridge-and-kadima-sell-12-property-new-jersey-industrial-portfolio-to-lb/">Corebridge and Kadima sell 12-property New Jersey industrial portfolio to L&amp;B</a> <span class="src">ROI-NJ</span> <span class="when">Fri 9:55 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/group-4-boys-soccer-stat-leaders-for-friday-sept-18.html">Group 4 boys soccer stat leaders for Friday, Sept. 18</a> <span class="src">NJ.com</span> <span class="when">Fri 9:52 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/realestate-news/2026/09/10-most-expensive-homes-sold-in-burlington-county-sept-7-13.html">10 most expensive homes sold in Burlington County, Sept. 7-13</a> <span class="src">NJ.com</span> <span class="when">Fri 9:46 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/statewide-boys-soccer-stat-leaders-for-friday-sept-18.html">Statewide boys soccer stat leaders for Friday, Sept. 18</a> <span class="src">NJ.com</span> <span class="when">Fri 9:46 AM</span></li>
-<li class="is-other"><a href="https://jerseydigs.com/feliz-deliz-bakery-opening-jersey-city/">New Bakery Feliz Deliz Opens Brick and Mortar Spot in Jersey City</a> <span class="src">Jersey Digs</span> <span class="when">Fri 9:45 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/daily-field-hockey-stat-leaders-for-thurs-sept-17.html">Daily field hockey stat leaders for Thursday, Sept. 17</a> <span class="src">NJ.com</span> <span class="when">Fri 9:42 AM</span></li>
-<li class="is-other"><a href="https://jerseydigs.com/nrg-adventure-park-paramus/">59,000-Square-Foot Indoor Adventure Park Coming to Former Sears Property in Paramus</a> <span class="src">Jersey Digs</span> <span class="when">Fri 9:41 AM</span></li>
-<li class="is-other"><a href="https://www.roi-nj.com/2026/09/18/law/harsch-former-chief-of-criminal-division-for-the-u-s-attorneys-office-becomes-partner-at-spiro-harrison-nelson/">Harsch, former chief of Criminal Division for the U.S. Attorney’s Office, becomes partner at Spiro Harrison &amp; Nelson</a> <span class="src">ROI-NJ</span> <span class="when">Fri 9:40 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/greater-middlesex-conference-boys-soccer-stat-leaders-for-friday-sept-18.html">Greater Middlesex Conference boys soccer stat leaders for Friday, Sept. 18</a> <span class="src">NJ.com</span> <span class="when">Fri 9:37 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/boys-soccer-results-and-recaps-for-friday-sept-18.html">Boys soccer: Results and recaps for Friday, Sept. 18</a> <span class="src">NJ.com</span> <span class="when">Fri 9:37 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/yankees/2026/09/former-mlb-star-calls-out-yankees-aaron-judge-over-latest-injury-scare.html">Former MLB star calls out Yankees’ Aaron Judge over latest injury scare</a> <span class="src">NJ.com</span> <span class="when">Fri 9:36 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/news/2026/09/where-you-can-pick-your-own-apples-in-nj-this-fall-a-farm-by-farm-guide.html">Ready to pick apples in N.J.? Here&#x27;s every orchard still open this fall.</a> <span class="src">NJ.com</span> <span class="when">Fri 9:36 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/colonial-valley-conference-boys-soccer-stat-leaders-for-friday-sept-18.html">Colonial Valley Conference boys soccer stat leaders for Friday, Sept. 18</a> <span class="src">NJ.com</span> <span class="when">Fri 9:30 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/news/2026/09/a-common-choice-many-married-couples-make-may-be-linked-to-divorce.html">Study finds link between surname choices and divorce rates</a> <span class="src">NJ.com</span> <span class="when">Fri 9:30 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/sports/2026/09/high-school-football-coach-arrested-for-allegedly-punching-player-during-game.html">Georgia high school football coach arrested for allegedly punching player during game</a> <span class="src">NJ.com</span> <span class="when">Fri 9:28 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/olympic-conference-boys-soccer-stat-leaders-for-friday-sept-18.html">Olympic Conference boys soccer stat leaders for Friday, Sept. 18</a> <span class="src">NJ.com</span> <span class="when">Fri 9:25 AM</span></li>
-<li class="is-other"><a href="https://jerseydigs.com/newark-commissioner-fired-cathedral-house-demolition/">Newark Commissioner is Fired After Voting Against NJPAC Cathedral House Demolition</a> <span class="src">Jersey Digs</span> <span class="when">Fri 9:19 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/realestate-news/2026/09/10-most-expensive-homes-sold-in-bergen-county-sept-7-13.html">10 most expensive homes sold in Bergen County, Sept. 7-13</a> <span class="src">NJ.com</span> <span class="when">Fri 9:16 AM</span></li>
-<li class="is-other"><a href="https://unionnewsdaily.com/news/doggy-dip-returns-to-the-summit-family-aquatic-center-on-sept-26">Doggy Dip returns to the Summit Family Aquatic Center on Sept. 26</a> <span class="src">Union News Daily</span> <span class="when">Fri 9:15 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/union-county-conference-boys-soccer-stat-leaders-for-friday-sept-18.html">Union County Conference boys soccer stat leaders for Friday, Sept. 18</a> <span class="src">NJ.com</span> <span class="when">Fri 9:14 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/cape-atlantic-league-boys-soccer-stat-leaders-for-friday-sept-18.html">Cape-Atlantic League boys soccer stat leaders for Friday, Sept. 18</a> <span class="src">NJ.com</span> <span class="when">Fri 9:13 AM</span></li>
-<li class="is-other"><a href="https://www.cbsnews.com/newyork/video/man-wanted-to-strealing-sports-cards-worth-over-17k-police-say/">Man wanted to strealing sports cards worth over $17k, police say</a> <span class="src">CBS New York</span> <span class="when">Fri 9:11 AM</span></li>
-<li class="is-other"><a href="https://unionnewsdaily.com/news/summit-downtowns-arts-cars-festival-returns">Summit Downtown’s Arts &amp; Cars Festival returns</a> <span class="src">Union News Daily</span> <span class="when">Fri 9:10 AM</span></li>
-<li class="is-other"><a href="https://www.nj.com/highschoolsports/2026/09/skyland-conference-boys-soccer-stat-leaders-for-friday-sept-18.html">Skyland Conference boys soccer stat leaders for Friday, Sept. 18</a> <span class="src">NJ.com</span> <span class="when">Fri 9:09 AM</span></li>
-<li class="is-other"><a href="https://whyy.org/episodes/whyy-newscast-for-friday-900-a-m/">WHYY Newscast for Friday 9:00 a.m.</a> <span class="src">WHYY</span> <span class="when">Fri 9:00 AM</span></li>
-<li class="is-other"><a href="https://www.cbsnews.com/newyork/news/model-of-nyc-museum-exhibit-truck-driver-joe-macken/">A truck driver built a model of NYC with over 800,000 structures for fun. Now it&#x27;s a museum exhibit</a> <span class="src">CBS New York</span> <span class="when">Fri 8:55 AM</span></li>
-<li class="is-other"><a href="https://gothamist.com/news/early-addition-watch-out-for-jalen-brunson-in-law-order-svu">Early Addition: Watch out for Jalen Brunson in &#x27;Law &amp; Order: SVU&#x27;</a> <span class="src">WNYC/Gothamist</span> <span class="when">Fri 8:53 AM</span></li>
-<li class="is-other"><a href="https://gothamist.com/news/50k-worth-of-meds-stolen-in-serial-pharmacy-burglaries-as-nypd-searches-for-suspects">$50K worth of meds stolen in serial pharmacy burglaries as NYPD searches for suspects</a> <span class="src">WNYC/Gothamist</span> <span class="when">Fri 8:31 AM</span></li>
-<li class="is-other"><a href="https://njbiz.com/nj-wipes-out-90m-in-medical-debt-for-20000-residents/">NJ wipes out $90M in medical debt for 20,000 residents</a> <span class="src">NJ Biz</span> <span class="when">Fri 8:05 AM</span></li>
-<li class="is-other"><a href="https://gothamist.com/arts-entertainment/talking-concrete-and-confidence-with-john-wilson-documentarian-of-oddball-nyc">Talking concrete and confidence with John Wilson, documentarian of oddball NYC</a> <span class="src">WNYC/Gothamist</span> <span class="when">Fri 8:00 AM</span></li>
-<li class="is-other"><a href="https://www.cbsnews.com/newyork/news/public-charge-rule-donald-trump-administration-immigrants-ny-lawsuit/">Trump administration&#x27;s public charge rule for immigrants goes into effect while N.Y. lawmakers sue to stop it</a> <span class="src">CBS New York</span> <span class="when">Fri 7:51 AM</span></li>
-<li class="is-other"><a href="https://njbiz.com/njbiz-womens-leadership-summit-navigating-change/">NJBIZ Women’s Leadership Summit to focus on navigating change</a> <span class="src">NJ Biz</span> <span class="when">Fri 7:50 AM</span></li>
-<li class="is-other"><a href="https://www.cbsnews.com/newyork/news/patrick-clancy-rachel-danis-60-minutes-sunday/">Patrick Clancy&#x27;s wife: &quot;I don&#x27;t understand how the story&#x27;s been so twisted&quot;</a> <span class="src">CBS New York</span> <span class="when">Fri 7:45 AM</span></li>
-<li class="is-other"><a href="https://www.cbsnews.com/newyork/video/free-pop-up-pays-tribute-to-nycs-beloved-bodega-cats/">Free pop-up pays tribute to NYC&#x27;s beloved bodega cats</a> <span class="src">CBS New York</span> <span class="when">Fri 7:27 AM</span></li>
-<li class="is-other"><a href="https://www.cbsnews.com/newyork/video/colin-jost-pete-davidson-transform-staten-island-ferry-boat-into-comedy-club/">Colin Jost, Pete Davidson transform Staten Island Ferry boat into comedy club</a> <span class="src">CBS New York</span> <span class="when">Fri 7:22 AM</span></li>
-<li class="is-other"><a href="https://www.cbsnews.com/newyork/video/man-wanted-is-sexual-abuse-suspect-in-brooklyn-nypd-says/">Man wanted is sexual abuse suspect in Brooklyn, NYPD says</a> <span class="src">CBS New York</span> <span class="when">Fri 7:18 AM</span></li>
-<li class="is-other"><a href="https://www.roi-nj.com/2026/09/18/education/rowan-university-reopens-campbell-library-after-two-years-and-23-4m-renovation/">Rowan University reopens Campbell Library after two years and $23.4M renovation</a> <span class="src">ROI-NJ</span> <span class="when">Fri 7:10 AM</span></li>
-  
-      </ul>
+    <div class="summary-line" id="summary" aria-label="Snapshot totals">Headlines link directly to the original publishers.</div>
+    <nav class="page-tabs" aria-label="Explore the snapshot">
+      <a href="#headlines" data-view-link="headlines" aria-current="page">Headlines</a>
+      <a href="#newsrooms" data-view-link="newsrooms">Newsrooms</a>
+      <a href="#about" data-view-link="about">About this snapshot</a>
+    </nav>
+    <div id="load-state" class="load-state" role="status"><p>Loading the headline index…</p><p>The <a href="snapshot.html">original snapshot</a> is also available as a plain reading page.</p></div>
+    <noscript><p class="notice">This news desk needs JavaScript for its filters. <a href="snapshot.html">Read all embedded headlines and the partner directory without JavaScript.</a></p></noscript>
+    <section id="headlines" class="desk" aria-label="Browse headlines" hidden>
+      <aside class="sidebar">
+        <h2>Your news desk</h2>
+        <div id="scopes" class="scope-list" role="group" aria-label="Headline collection">
+          <button type="button" data-scope="all" aria-pressed="true"><span>All headlines</span><b id="all-count">0</b></button>
+          <button type="button" data-scope="partners" aria-pressed="false"><span>Partners</span><b id="partner-count">0</b></button>
+          <button type="button" data-scope="saved" aria-pressed="false"><span>Saved stories</span><b id="saved-count">0</b></button>
+        </div>
+        <details id="filter-panel" class="filter-panel" open><summary id="filter-summary">Filter headlines</summary><div class="filter-fields">
+          <label for="source">Newsroom</label><select id="source"><option value="">All newsrooms</option></select>
+          <label for="day">Publication date</label><select id="day"><option value="">All dates in snapshot</option></select>
+          <button type="button" id="reset" class="text-button">Reset filters</button>
+        </div></details>
+        <p class="small sidebar-note">Save stories for later. Your list stays in this browser; it is not shared with anyone.</p>
+        <p id="storage-note" class="small notice" hidden>Browser storage is unavailable. Saves and appearance changes will last for this visit only.</p>
+        <div class="sidebar-foot"><span class="partner-key">Partner</span><p class="small">Labels follow the invitation list used for this snapshot.</p><a href="#newsrooms" data-view-link="newsrooms">Explore the newsrooms <span aria-hidden="true">→</span></a></div>
+      </aside>
+      <div class="reading-desk">
+        <form id="search-form" role="search"><label for="search">Search headlines and newsrooms</label><div class="search-box"><span aria-hidden="true">⌕</span><input id="search" name="q" type="search" placeholder="Try a town, newsroom, or keyword" maxlength="240" autocomplete="off"><button type="button" id="clear-search" aria-label="Clear headline search" hidden>Clear</button><kbd aria-hidden="true">/</kbd></div></form>
+        <div class="result-toolbar"><h2 id="results-title" tabindex="-1">All headlines</h2><div class="reading-controls"><label for="sort">Sort</label><select id="sort"><option value="newest">Newest first</option><option value="oldest">Oldest first</option><option value="source">Newsroom A–Z</option></select><button type="button" id="density" aria-pressed="false">Compact view</button></div></div>
+        <div class="result-subbar"><p id="result-count" role="status" aria-live="polite" aria-atomic="true"></p><div><button type="button" id="share" class="text-button">Copy view link</button><button type="button" id="export" class="text-button">Export results</button></div></div>
+        <p id="saved-note" class="small notice" hidden>Your saved list includes stories kept from earlier snapshots. Search and newsroom filters also apply here.</p>
+        <ul id="story-list" class="story-list"></ul>
+        <div id="empty" class="empty" hidden><h3 id="empty-title">No matching headlines</h3><p id="empty-copy">Try fewer words or reset your filters.</p><button type="button" id="empty-reset">Reset filters</button></div>
+        <div class="list-end"><button type="button" id="load-more" hidden>Show more headlines</button><a href="#main">Back to top ↑</a></div>
+      </div>
     </section>
-    <h2>Partner coverage</h2>
-    <p class="note">20 of 35 mapped outlets have a working RSS feed right now. The rest need a homepage scrape, a paid login, or are not daily text publishers.</p>
-    <table>
-    <thead><tr><th>Organization</th><th>Type</th><th>RSS</th><th>Site</th></tr></thead>
-    <tbody>
-      <tr><td>NJ State House News Service</td><td>wire</td><td>No</td><td>—</td></tr><tr><td>Northern New Jersey All Incidents</td><td>scanner</td><td>No</td><td>—</td></tr><tr><td>Coop Camden</td><td>community</td><td>No</td><td>—</td></tr><tr><td>KCED / KORISE / Mom&amp;I</td><td>ethnic</td><td>No</td><td>—</td></tr><tr><td>Daniel Productions</td><td>production</td><td>No</td><td>—</td></tr><tr><td>Village Green</td><td>news</td><td>Yes</td><td><a href="https://villagegreennj.com">villagegreennj.com</a></td></tr><tr><td>Montclair Local</td><td>news</td><td>Yes</td><td><a href="https://montclairlocal.news">montclairlocal.news</a></td></tr><tr><td>New Jersey Monitor</td><td>news</td><td>Yes</td><td><a href="https://newjerseymonitor.com">newjerseymonitor.com</a></td></tr><tr><td>Jersey Shore Online</td><td>news</td><td>Yes</td><td><a href="https://www.jerseyshoreonline.com">jerseyshoreonline.com</a></td></tr><tr><td>New Jersey Business Magazine</td><td>news</td><td>No</td><td><a href="https://njbmagazine.com">njbmagazine.com</a></td></tr><tr><td>TAPinto (network)</td><td>news</td><td>No</td><td><a href="https://www.tapinto.net">tapinto.net</a></td></tr><tr><td>TAPinto Fair Lawn / Glen Rock / Ridgewood / Hawthorne</td><td>news</td><td>No</td><td><a href="https://www.tapinto.net">tapinto.net</a></td></tr><tr><td>Hudson County View</td><td>news</td><td>Yes</td><td><a href="https://hudsoncountyview.com">hudsoncountyview.com</a></td></tr><tr><td>Heady NJ</td><td>news</td><td>Yes</td><td><a href="https://headynj.com">headynj.com</a></td></tr><tr><td>Princeton Perspectives</td><td>news</td><td>Yes</td><td><a href="https://princetonperspectives.com">princetonperspectives.com</a></td></tr><tr><td>The Two River Times</td><td>news</td><td>Yes</td><td><a href="https://www.tworivertimes.com">tworivertimes.com</a></td></tr><tr><td>Trenton Journal</td><td>news</td><td>Yes</td><td><a href="https://trentonjournal.com">trentonjournal.com</a></td></tr><tr><td>Cranford Radio</td><td>audio</td><td>No</td><td><a href="https://www.cranfordradio.com">cranfordradio.com</a></td></tr><tr><td>New Jersey Hills Media Group</td><td>news</td><td>No</td><td><a href="https://www.newjerseyhills.com">newjerseyhills.com</a></td></tr><tr><td>New Jersey Urban News</td><td>news</td><td>Yes</td><td><a href="https://www.njurbannews.com">njurbannews.com</a></td></tr><tr><td>State Broadcast News</td><td>audio</td><td>Yes</td><td><a href="https://www.statebroadcastnews.com">statebroadcastnews.com</a></td></tr><tr><td>State of the Arts NJ</td><td>video</td><td>Yes</td><td><a href="https://www.stateoftheartsnj.com">stateoftheartsnj.com</a></td></tr><tr><td>The Jersey Bee</td><td>news</td><td>Yes</td><td><a href="https://jerseybee.org">jerseybee.org</a></td></tr><tr><td>Weehawken Gazette</td><td>news</td><td>Yes</td><td><a href="https://www.weehawkengazette.com">weehawkengazette.com</a></td></tr><tr><td>The Woodbury Warbler</td><td>news</td><td>Yes</td><td><a href="https://woodburywarbler.com">woodburywarbler.com</a></td></tr><tr><td>Slice of Culture</td><td>news</td><td>Yes</td><td><a href="https://www.sliceofculture.com">sliceofculture.com</a></td></tr><tr><td>HudPost</td><td>news</td><td>Yes</td><td><a href="https://hudpost.com">hudpost.com</a></td></tr><tr><td>Atlantic City Focus</td><td>news</td><td>Yes</td><td><a href="https://www.atlanticcityfocus.com">atlanticcityfocus.com</a></td></tr><tr><td>Follow South Jersey</td><td>news</td><td>Yes</td><td><a href="https://followsouthjersey.com">followsouthjersey.com</a></td></tr><tr><td>Black In Jersey</td><td>news</td><td>No</td><td><a href="https://blackinjersey.com">blackinjersey.com</a></td></tr><tr><td>Four Oranges</td><td>news</td><td>No</td><td><a href="https://fouroranges.com">fouroranges.com</a></td></tr><tr><td>Central Desi</td><td>news</td><td>No</td><td><a href="https://centraldesi.com">centraldesi.com</a></td></tr><tr><td>Central New Jersey Network</td><td>video</td><td>No</td><td><a href="https://www.cnjn.org">cnjn.org</a></td></tr><tr><td>CGNet Swara</td><td>other</td><td>Yes</td><td><a href="https://cgnetswara.org">cgnetswara.org</a></td></tr><tr><td>New Jersey Dental Association</td><td>org</td><td>No</td><td><a href="https://www.njda.org">njda.org</a></td></tr>
-    </tbody>
-  </table>
+    <section id="newsrooms" class="directory-view" aria-labelledby="directory-title" hidden>
+      <div class="section-heading"><div><p class="kicker">Go to the source</p><h2 id="directory-title">The newsroom directory</h2><p>Organizations on the snapshot’s partner invitation list, plus other publishers with embedded headlines.</p></div></div>
+      <div class="directory-controls"><div><label for="room-search">Find a newsroom</label><input type="search" id="room-search" placeholder="Name, domain, or type" maxlength="240"></div><div><label for="room-filter">Show</label><select id="room-filter"><option value="all">All organizations</option><option value="partners">Partner invitation list</option><option value="stories">With embedded headlines</option><option value="missing">Partner feed not listed</option></select></div></div>
+      <p class="small" id="directory-count" role="status"></p><div id="directory-list" class="directory-list"></div>
+      <p class="small">Feed status describes the supplied snapshot, not a live health check. No headlines does not mean a newsroom has stopped publishing.</p>
+    </section>
+    <section id="about" class="about-view" aria-labelledby="about-title" hidden>
+      <p class="kicker">Know what you’re browsing</p><h2 id="about-title">A snapshot, not a live feed</h2><p id="about-meta"></p>
+      <div class="about-grid"><section><h3>What’s on this page</h3><p id="coverage-note"></p><p>Search, dates, counts, and exports use only the headlines embedded in the source page. Dates use Eastern time, not your device’s time zone.</p><a href="snapshot.html">Read the unchanged source snapshot ↗</a></section><section><h3>Where the headlines come from</h3><p>The Daily News Roundup feed list and the NJ PBS partner invitation list. Publisher headlines and links are preserved. The page does not rank stories by importance or add summaries.</p><p>“Partner” reflects the supplied invitation list, not a separate check of current membership.</p></section><section><h3>Gaps in the snapshot</h3><p id="feed-note"></p><p>The original snapshot reports a TAPinto RSS access error. It does not bypass paywalls, scrape more stories, or send newsletter campaigns.</p></section><section><h3>Your reading list</h3><p>Saved stories stay in local browser storage on this device. They can include stories from an earlier snapshot. Clearing browser data removes the list.</p><p>View links share search and filters, not your saved stories. Exports include every matching result, not just the rows currently shown.</p></section></div>
+      <h3>Original collection summary</h3><p class="small">These are the source page’s collection totals, not the number of browsable results.</p><dl id="original-stats" class="original-stats"></dl>
+    </section>
   </main>
-  <footer>
-    NJ PBS · Center for Cooperative Media · Daily News Roundup demo · Friday, September 18, 2026, 12:01 PM EDT.
-    Official NJ PBS marks. This page is a snapshot. It does not log in to paywalls and it does not send Mailchimp campaigns.
-  </footer>
-  <script>
-    const buttons = document.querySelectorAll(".filters button");
-    buttons.forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const partners = btn.dataset.filter === "partners";
-        document.body.classList.toggle("partners-only", partners);
-        buttons.forEach((other) => other.setAttribute("aria-pressed", String(other === btn)));
-        const otherBlock = document.getElementById("other-block");
-        if (otherBlock) otherBlock.hidden = partners;
-      });
-    });
-  </script>
+  <footer class="footer wrap"><div><strong>NJ PBS</strong><span>Center for Cooperative Media · Daily News Roundup</span></div><p>Read locally. Go directly to the source.</p><a href="snapshot.html">Original snapshot</a></footer>
+  <div id="announcement" class="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+  <dialog id="copy-dialog"><form method="dialog"><h2>Copy this view link</h2><p>Clipboard access is unavailable. Select and copy the link below.</p><label for="copy-value">View link</label><input id="copy-value" type="text" readonly><button>Close</button></form></dialog>
 </body>
 </html>

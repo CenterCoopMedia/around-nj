@@ -1,0 +1,42 @@
+name: News desk checks
+on:
+  pull_request:
+    branches: [gh-pages]
+  push:
+    branches: [gh-pages, joe/around-nj-news-desk]
+permissions:
+  contents: read
+concurrency:
+  group: news-desk-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+jobs:
+  news-desk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Check syntax and data logic
+        run: |
+          node --check assets/desk.mjs
+          node --check assets/desk-core.mjs
+          node --test tests/core.test.mjs
+      - name: Install browser test tools
+        run: |
+          python -m pip install playwright==1.55.0
+          python -m playwright install --with-deps chromium
+      - name: Test the committed snapshot
+        run: python tests/test_browser.py
+      - name: Save desktop and mobile previews
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: news-desk-previews
+          path: artifacts/
+          if-no-files-found: ignore
+          retention-days: 14
