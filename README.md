@@ -19,7 +19,7 @@ Merge the review branch into `gh-pages`, not `master`, to update the existing Pa
 
 To refresh headlines, replace **`snapshot.html`**, not `index.html`. Keep `.meta` (capture date), `.stat b/span` (original collection totals), `ul.stories > li` with its `.is-partner` class, anchor, `.src`, and `.when`, plus the four-column partner table (organization, type, RSS, website).
 
-Twice-daily publishes that only change `snapshot.html` do not run this workflow. Desk, CSS, or test changes still run the checks.
+Snapshot refresh commits include `[skip ci]` so GitHub Actions does not run Playwright for those pushes. Desk, CSS, or test changes still run the checks.
 
 ## Data and editorial limits
 
