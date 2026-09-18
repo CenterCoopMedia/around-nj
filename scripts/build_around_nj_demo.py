@@ -13,7 +13,8 @@ import socket
 import ssl
 import sys
 import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
+from concurrent.futures import ThreadPoolExecutor, TimeoutError as FuturesTimeout
+from concurrent.futures import as_completed
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
@@ -272,6 +273,21 @@ def fetch_feed(url: str, source: str, partner: bool = False) -> dict:
         return result
 
 
+def fetch_feed_bounded(url: str, source: str, partner: bool = False) -> dict:
+    with ThreadPoolExecutor(max_workers=1) as inner:
+        fut = inner.submit(fetch_feed, url, source, partner)
+        try:
+            return fut.result(timeout=DEADLINE_SECONDS + 2)
+        except FuturesTimeout:
+            return {
+                "source": source,
+                "url": url,
+                "ok": False,
+                "items": [],
+                "error": "deadline",
+            }
+
+
 def fmt_when(iso: str | None) -> str:
     if not iso:
         return ""
@@ -393,7 +409,7 @@ def main() -> None:
     ok_urls: set[str] = set()
     with ThreadPoolExecutor(max_workers=16) as pool:
         futs = {
-            pool.submit(fetch_feed, url, name, partner): (url, name)
+            pool.submit(fetch_feed_bounded, url, name, partner): (url, name)
             for url, name, partner in jobs
         }
         for fut in as_completed(futs):
@@ -426,13 +442,22 @@ def main() -> None:
 
     partner_names = {p["org"] for p in partners if p.get("org")}
 
-    unique = []
-    seen_urls = set()
-    for story in sorted(stories, key=lambda s: s.get("when") or "", reverse=True):
+    by_key: dict[str, dict] = {}
+    for story in stories:
         key = canonical_url(story["url"])
-        if key in seen_urls:
+        current = by_key.get(key)
+        if current is None:
+            by_key[key] = story
             continue
-        seen_urls.add(key)
+        merged_partner = bool(current.get("partner")) or bool(story.get("partner"))
+        newer = (story.get("when") or "") > (current.get("when") or "")
+        keep = story if newer else current
+        keep["partner"] = merged_partner
+        by_key[key] = keep
+    unique = []
+    for story in sorted(
+        by_key.values(), key=lambda s: s.get("when") or "", reverse=True
+    ):
         story["partner"] = bool(story.get("partner")) or is_partner(
             story, partner_names
         )
