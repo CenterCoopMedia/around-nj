@@ -1,41 +1,28 @@
-# Daily News Roundup (DNR)
+# Around New Jersey
 
-Automated newsletter production for the Daily News Roundup, a Mailchimp newsletter from the [Center for Cooperative Media](https://centerforcooperativemedia.org) at Montclair State University.
+NJ PBS News product for a daily, browsable feed of what New Jersey newsrooms are reporting, with [News Commons](https://njnewscommons.org/) partners marked.
 
-The newsletter aggregates New Jersey journalism for the NJ News Commons network. The same feed list now also powers an [Around New Jersey](https://centercoopmedia.github.io/dnr/) demo for NJ PBS: headlines from statewide sources, with News Commons partners marked.
+Public snapshot: https://centercoopmedia.github.io/around-nj/
 
-## Features
+The Center for Cooperative Media at Montclair State University builds and operates the collection pipeline. NJ PBS uses the feed for the Around New Jersey segment. Official NJ PBS marks only: white-and-blue logo on navy. Do not use the retired green NJ logo.
 
-- **Automated news aggregation** from 75+ NJ news sources via RSS feeds
-- **User submissions** via Airtable integration with notification automation
-- **AI-powered classification** using Claude Haiku to categorize stories into 7 sections
-- **Smart content filtering** to exclude crime, sports scores, lottery results, etc. from top stories
-- **Playwright scraping** for paywalled sites (NorthJersey.com, Asbury Park Press, Press of Atlantic City)
-- **Interactive workflow** with natural language feedback for refining story selection
-- **Mailchimp integration** for draft campaign creation
-- **Date-aware fetching** (36 hours for Tue-Thu, weekend coverage for Monday)
+## What it does
 
-## Newsletter sections
+- Pulls headlines from 75+ New Jersey sources
+- Stars organizations that signed up to work with NJ PBS
+- Filters to partners only, or shows the statewide layer
+- Keeps the Daily News Roundup Mailchimp newsletter as a second output from the same pipeline
 
-| Section | Content type |
-|---------|--------------|
-| Top stories | Major statewide policy news, stories with multi-outlet coverage |
-| Politics + government | Legislature, elections, courts, municipal government |
-| Housing + development | Affordable housing, zoning, real estate policy |
-| Work + education | K-12, higher education, school boards |
-| Health + safety | Healthcare, public health, hospitals |
-| Climate + environment | Offshore wind, clean energy, PFAS, DEP actions |
-| Lastly | Arts, sports, restaurants, human interest |
+This repository used to be `CenterCoopMedia/dnr`. GitHub redirects the old repo URL. The Pages URL is now `/around-nj/`.
 
-## Around New Jersey demo
+## Live demo
 
-Live snapshot: https://centercoopmedia.github.io/dnr/
+https://centercoopmedia.github.io/around-nj/
 
-NJ PBS asked for a browsable daily view of what News Commons partners are reporting, for an Around New Jersey segment. The GitHub Pages demo uses official NJ PBS marks (white-and-blue logo on navy, PBS Sans, PBS blue). It is a 72-hour RSS snapshot, not a live product.
-
-- Partners only: filter control on the page
+- All stories / Partners only
+- 72-hour RSS snapshot, not a live all-day product
 - TAPinto town feeds currently return HTTP 403
-- USA Today network RSS URLs in `config/rss_feeds.json` currently return 404
+- Several USA Today network RSS URLs in `config/rss_feeds.json` currently return 404
 
 Rebuild:
 
@@ -45,14 +32,26 @@ python scripts/build_around_nj_demo.py --output drafts/around-nj-demo.html
 
 See `docs/around-nj-demo.md`.
 
+## Daily News Roundup newsletter
+
+The same `src/` pipeline still produces the CCM Mailchimp newsletter (Monday through Thursday). That path is unchanged:
+
+```bash
+python src/workflow.py
+python src/workflow.py --playwright
+python src/main.py --preview
+```
+
+Windows launchers: `DNR_Standard.bat`, `DNR_Full.bat`.
+
 ## Continuous integration
 
-Pull requests and pushes to `master` run GitHub Actions:
+Pull requests and pushes to `master` run:
 
 - `ruff check` and `ruff format --check`
 - `pytest` (offline RSS filters)
-- gitleaks secret scan
-- a `CI gate` job that must pass
+- gitleaks
+- `CI gate`
 
 `master` requires a pull request, the `CI gate` check, and resolved review threads (including for admins).
 
@@ -64,189 +63,65 @@ pytest -q
 
 ## Installation
 
-### Prerequisites
-
-- Python 3.11+
-- Windows (batch files provided) or Linux/Mac
-- API keys for Anthropic, Mailchimp, Airtable
-
-### Setup
+Python 3.11+. API keys for Anthropic, Mailchimp, and Airtable.
 
 ```bash
-# Clone the repository
-git clone https://github.com/CenterCoopMedia/dnr.git
-cd dnr
-
-# Create virtual environment
+git clone https://github.com/CenterCoopMedia/around-nj.git
+cd around-nj
 python -m venv venv
-
-# Activate (Windows)
-venv\Scripts\activate
-
-# Activate (Linux/Mac)
-source venv/bin/activate
-
-# Install dependencies
+source venv/bin/activate   # Windows: venv\Scripts\activate
 pip install -r requirements.txt
-
-# Install Playwright browsers (for paywalled sites)
-playwright install chromium
+playwright install chromium   # optional, paywalled sites
 ```
 
-### Configuration
-
-Create a `.env` file with your API credentials:
+Create `.env`:
 
 ```env
-# Anthropic (required)
-ANTHROPIC_API_KEY=your_key_here
-
-# Airtable (required)
-AIRTABLE_PAT=your_personal_access_token
-AIRTABLE_BASE_ID=your_base_id
-AIRTABLE_TABLE_ID=your_table_id
-
-# Mailchimp (required)
-MAILCHIMP_API_KEY=your_api_key
-MAILCHIMP_SERVER_PREFIX=us1  # or your server prefix
-MAILCHIMP_LIST_ID=your_audience_id
-
-# Google Gemini (optional, for URL enrichment)
-GEMINI_API_KEY=your_key_here
+ANTHROPIC_API_KEY=
+AIRTABLE_PAT=
+AIRTABLE_BASE_ID=
+AIRTABLE_TABLE_ID=
+MAILCHIMP_API_KEY=
+MAILCHIMP_SERVER_PREFIX=us1
+MAILCHIMP_LIST_ID=
+GEMINI_API_KEY=   # optional
 ```
 
-## Usage
+## Newsletter sections
 
-### Quick start (Windows)
+| Section | Content type |
+| --- | --- |
+| Top stories | Statewide policy news, multi-outlet coverage |
+| Politics + government | Legislature, elections, courts, municipal government |
+| Housing + development | Affordable housing, zoning, real estate policy |
+| Work + education | K-12, higher education, school boards |
+| Health + safety | Healthcare, public health, hospitals |
+| Climate + environment | Offshore wind, clean energy, PFAS, DEP |
+| Lastly | Arts, sports, restaurants, human interest |
 
-```bash
-# Standard workflow (RSS + Airtable)
-DNR_Standard.bat
-
-# Full workflow (includes Playwright for paywalled sites)
-DNR_Full.bat
-```
-
-### Command line
-
-```bash
-# Interactive workflow
-python src/workflow.py
-
-# With Playwright sources
-python src/workflow.py --playwright
-
-# With URL enrichment
-python src/workflow.py --enrich
-
-# Custom time range (hours back)
-python src/workflow.py --hours 48
-
-# Direct pipeline (no interactive prompts)
-python src/main.py --preview
-python src/main.py --dry-run
-```
-
-## Workflow
-
-The interactive workflow has 7 steps:
-
-1. **Fetch stories** - Collects from RSS feeds, Airtable, and optionally Playwright
-2. **Enrich stories** (optional) - Uses Gemini API to extract context from URLs
-3. **Classify stories** - Claude Haiku assigns each story to a section
-4. **Review Airtable submissions** - Approve source/section for user submissions
-5. **Generate HTML preview** - Creates preview file in `drafts/`
-6. **Review and refine** - Natural language feedback loop
-7. **Create Mailchimp draft** - Ready for final review and send
-
-### Natural language feedback
-
-During step 6, you can refine the newsletter using plain English:
-
-```
-Feedback: Move the NJ Transit story to politics
-    ✓ Moved 'nj transit...' from top_stories to politics
-
-Feedback: Remove the carjacking story from top stories
-    ✓ Removed 'carjacking...' from top_stories
-
-Feedback: done
-```
+See `docs/STYLE_GUIDE.md`.
 
 ## Project structure
 
 ```
-dnr/
-├── src/
-│   ├── workflow.py          # Interactive 7-step workflow
-│   ├── main.py              # Pipeline orchestrator
-│   ├── rss_fetcher.py       # RSS feed collection
-│   ├── airtable_fetcher.py  # User submission handling
-│   ├── classifier.py        # AI classification + filters
-│   ├── html_formatter.py    # HTML generation
-│   ├── playwright_fetcher.py # Paywalled site scraping
-│   └── url_enricher.py      # Gemini URL context
-├── config/
-│   └── rss_feeds.json       # RSS feed configuration (75+ sources)
-├── history/
-│   ├── dnr-template.html    # Mailchimp HTML template
-│   └── *.csv                # Historical newsletter data
-├── .github/workflows/ci.yml # Ruff, pytest, gitleaks, CI gate
+around-nj/
+├── src/                     # Collection, classify, Mailchimp
+├── scripts/                 # Around New Jersey snapshot builder
+├── config/rss_feeds.json    # Statewide feeds
+├── config/pbs_partners.json # NJ PBS invitation-list partners
 ├── docs/
-│   ├── STYLE_GUIDE.md       # Story selection criteria
-│   └── around-nj-demo.md    # NJ PBS Around New Jersey snapshot
-├── drafts/                  # Generated HTML previews
-├── DNR_Standard.bat         # Quick launch (standard)
-├── DNR_Full.bat             # Quick launch (with Playwright)
-├── requirements.txt         # Python dependencies
-├── CLAUDE.md                # Claude Code instructions
-└── README.md                # This file
+├── .github/workflows/ci.yml
+└── README.md
 ```
-
-## Content filtering
-
-The system automatically filters inappropriate content from top stories:
-
-**Blocked from top_stories:**
-- Crime stories (carjacking, murder, robbery, shooting)
-- Car crashes and accidents
-- High school sports scores and schedules
-- Gift guides and shopping deals
-- Lottery and Powerball results
-- Restaurant reviews and food rankings
-- Expensive house sale stories
-
-**Filtered entirely:**
-- Generic broadcast announcements ("WHYY Newscast for Tuesday...")
-- Non-NJ content (NYC-only, national news without NJ angle)
-
-See `docs/STYLE_GUIDE.md` for complete story selection criteria.
-
-## API usage
-
-| Service | Purpose | Model |
-|---------|---------|-------|
-| Anthropic | Story classification | Claude 3 Haiku |
-| Anthropic | Feedback processing | Claude 3 Haiku |
-| Mailchimp | Campaign creation | Marketing API |
-| Airtable | User submissions | REST API |
-| Google | URL enrichment | Gemini 2.0 Flash |
-
-## Schedule
-
-The newsletter publishes Monday through Thursday mornings:
-- **Monday:** Covers Friday 5am through Monday morning (~76 hours)
-- **Tuesday-Thursday:** Covers last 36 hours
-- **Friday-Sunday:** Not normal publish days (warning shown)
 
 ## Contributing
 
-This is an internal tool for the Center for Cooperative Media. For questions or issues, contact:
+Internal tool for NJ PBS and the Center for Cooperative Media.
 
-**Joe Amditis**
-Associate Director of Operations
+Joe Amditis  
+Associate Director of Operations  
 amditisj@montclair.edu
 
 ## License
 
-Internal use only - Center for Cooperative Media, Montclair State University
+Internal use only. Center for Cooperative Media, Montclair State University. NJ PBS marks remain NJ PBS / PBS property.

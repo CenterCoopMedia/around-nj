@@ -1,12 +1,13 @@
-# Daily News Roundup (DNR) - Claude Code instructions
+# Around New Jersey (NJ PBS) — agent instructions
 
 ## Project overview
 
-Automated newsletter production system for the Daily News Roundup, a Mailchimp newsletter produced by the Center for Cooperative Media at Montclair State University. The newsletter aggregates and curates New Jersey journalism news for distribution to the NJ News Commons network (~3,000 subscribers).
+NJ PBS product: a daily, browsable feed of New Jersey newsroom headlines with News Commons partners marked. The Center for Cooperative Media collection pipeline also still produces the Daily News Roundup Mailchimp newsletter.
 
-**Schedule:** Monday through Thursday mornings
-**Repo:** https://github.com/CenterCoopMedia/dnr
-**Around New Jersey demo:** https://centercoopmedia.github.io/dnr/
+**Repo:** https://github.com/CenterCoopMedia/around-nj
+**Public snapshot:** https://centercoopmedia.github.io/around-nj/
+**Newsletter schedule:** Monday through Thursday mornings
+**Brand:** Official NJ PBS white-and-blue logo on navy. Do not use the retired green NJ logo.
 
 ## Quick start
 
@@ -116,7 +117,7 @@ GitHub Actions runs the same checks plus gitleaks. `master` requires the `CI gat
 - `config/rss_feeds.json` - RSS feed configuration (75+ sources)
 - `history/dnr-template.html` - Mailchimp HTML template
 - `docs/STYLE_GUIDE.md` - Story selection criteria for each section
-- `docs/around-nj-demo.md` - NJ PBS Around New Jersey snapshot
+- `docs/around-nj-demo.md` - NJ PBS Around New Jersey snapshot (https://centercoopmedia.github.io/around-nj/)
 - `drafts/` - Generated HTML previews
 - `.github/workflows/ci.yml` - Ruff, pytest, gitleaks, CI gate
 

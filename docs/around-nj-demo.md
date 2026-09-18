@@ -1,6 +1,6 @@
 # Around New Jersey demo
 
-Public snapshot: https://centercoopmedia.github.io/dnr/
+Public snapshot: https://centercoopmedia.github.io/around-nj/
 
 ## What it is
 
@@ -10,7 +10,7 @@ It uses official NJ PBS marks: the white-and-blue horizontal logo on navy, PBS S
 
 ## How to use it in a meeting
 
-1. Open https://centercoopmedia.github.io/dnr/
+1. Open https://centercoopmedia.github.io/around-nj/
 2. Show partner headlines first.
 3. Switch to All stories for the statewide layer (Village Green, Morristown Green, and the rest of the DNR list).
 4. Use Partners only to hide everything except the invitation-list outlets.

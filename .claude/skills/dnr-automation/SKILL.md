@@ -1,6 +1,6 @@
 ---
 name: dnr-automation
-description: Automate the Daily News Roundup (DNR) newsletter pipeline for the Center for Cooperative Media. Run the DNR script with different modes (--preview generates HTML preview only, --dry-run shows story counts without generating files, full pipeline creates Mailchimp draft). Use this skill when working on DNR newsletter automation, running the pipeline, previewing newsletters, testing story collection and classification, or troubleshooting the NJ News Commons newsletter workflow.
+description: Automate Around New Jersey (NJ PBS) collection and the Daily News Roundup Mailchimp newsletter. Use for the partner-starred snapshot (scripts/build_around_nj_demo.py), RSS/Airtable collection, classification, previews, and Mailchimp drafts. Triggers: Around New Jersey, DNR, News Commons partners, NJ PBS feed.
 allowed-tools: Bash, Read, Glob, Grep
 ---
 
