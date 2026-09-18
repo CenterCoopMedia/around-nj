@@ -136,9 +136,43 @@ def domain(url: str | None) -> str:
     if not url:
         return ""
     try:
-        return urlparse(url).netloc.lower().replace("www.", "")
+        host = urlparse(url).hostname or ""
     except Exception:
         return ""
+    host = host.lower()
+    if host.startswith("www."):
+        host = host[4:]
+    return host
+
+
+def canonical_url(url: str) -> str:
+    parsed = urlparse(url)
+    host = domain(url)
+    path = (parsed.path or "/").rstrip("/") or "/"
+    scheme = "https" if parsed.scheme in {"http", "https"} else parsed.scheme
+    return f"{scheme}://{host}{path}"
+
+
+def valid_story_link(link: str) -> str | None:
+    try:
+        parsed = urlparse(link)
+    except ValueError:
+        return None
+    if parsed.scheme not in {"http", "https"}:
+        return None
+    if parsed.username or parsed.password:
+        return None
+    host = (parsed.hostname or "").lower()
+    if not host or "." not in host or host == "localhost":
+        return None
+    return link
+
+
+def norm_name(value: str) -> str:
+    text = (value or "").lower().strip()
+    if text.startswith("the "):
+        text = text[4:]
+    return re.sub(r"[^a-z0-9]+", " ", text).strip()
 
 
 def parse_when(entry) -> datetime | None:
@@ -183,11 +217,7 @@ def fetch_feed(url: str, source: str) -> dict:
             link = (entry.get("link") or "").strip()
             if not title or not link or is_generic_broadcast(title):
                 continue
-            try:
-                parsed_link = urlparse(link)
-            except ValueError:
-                continue
-            if parsed_link.scheme not in ("http", "https") or not parsed_link.hostname:
+            if valid_story_link(link) is None:
                 continue
             when = parse_when(entry)
             if when is None or when < cutoff or when > future_limit:
@@ -247,14 +277,19 @@ def story_li(story: dict, partner: bool) -> str:
     )
 
 
-def is_partner(story: dict, partner_names: set[str], partner_domains: set[str]) -> bool:
-    src = (story.get("source") or "").lower()
-    d = domain(story.get("url"))
-    if src in partner_names or any(
-        name in src for name in partner_names if len(name) > 8
-    ):
+def is_partner(story: dict, partner_names: set[str]) -> bool:
+    src = norm_name(story.get("source") or "")
+    names = {norm_name(name) for name in partner_names if name}
+    if not src:
+        return False
+    if src in names:
         return True
-    return bool(d) and any(d == pd or d.endswith("." + pd) for pd in partner_domains)
+    for name in names:
+        if len(name) < 10:
+            continue
+        if name in src or src in name:
+            return True
+    return False
 
 
 def main() -> None:
@@ -333,21 +368,16 @@ def main() -> None:
     if not stories:
         raise SystemExit("no stories fetched")
 
-    partner_names = {p["org"].lower() for p in partners}
-    partner_domains = set()
-    for partner in partners:
-        if partner.get("star_domain"):
-            partner_domains.add(partner["star_domain"])
-        if partner.get("home"):
-            partner_domains.add(domain(partner["home"]))
+    partner_names = {p["org"] for p in partners if p.get("org")}
 
     unique = []
     seen_urls = set()
     for story in sorted(stories, key=lambda s: s.get("when") or "", reverse=True):
-        if story["url"] in seen_urls:
+        key = canonical_url(story["url"])
+        if key in seen_urls:
             continue
-        seen_urls.add(story["url"])
-        story["partner"] = is_partner(story, partner_names, partner_domains)
+        seen_urls.add(key)
+        story["partner"] = is_partner(story, partner_names)
         unique.append(story)
 
     partner_stories = [s for s in unique if s["partner"]]
