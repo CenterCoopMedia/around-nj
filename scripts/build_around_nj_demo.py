@@ -150,8 +150,12 @@ def main() -> None:
     dnr_feeds = []
     for items in feeds_cfg.get("feeds", {}).values():
         for feed in items:
-            if feed.get("rss_url"):
-                dnr_feeds.append(feed)
+            url = feed.get("rss_nj") or feed.get("rss_url")
+            if not url:
+                continue
+            if (feed.get("coverage") or "").lower() == "nyc metro":
+                continue
+            dnr_feeds.append({**feed, "rss_url": url})
 
     jobs = [(f["rss_url"], f["name"]) for f in dnr_feeds]
     seen = {url for url, _ in jobs}
@@ -165,6 +169,7 @@ def main() -> None:
     session.headers.update({"User-Agent": UA})
     stories: list[dict] = []
     failures: list[dict] = []
+    ok_urls: set[str] = set()
     with ThreadPoolExecutor(max_workers=16) as pool:
         futs = {
             pool.submit(fetch_feed, session, url, name): (url, name)
@@ -173,6 +178,7 @@ def main() -> None:
         for fut in as_completed(futs):
             result = fut.result()
             if result["ok"]:
+                ok_urls.add(result["url"])
                 stories.extend(result["items"])
             else:
                 failures.append(result)
@@ -204,7 +210,9 @@ def main() -> None:
 
     partner_stories = [s for s in unique if s["partner"]]
     other_stories = [s for s in unique if not s["partner"]]
-    with_rss = [p for p in partners if p.get("rss")]
+    shown_partners = partner_stories[:MAX_LIST]
+    shown_other = other_stories[:MAX_LIST]
+    working_partners = [p for p in partners if p.get("rss") in ok_urls]
     now = fmt_now(datetime.now().astimezone())
 
     rows = []
@@ -215,29 +223,30 @@ def main() -> None:
             if home
             else "—"
         )
+        rss_ok = partner.get("rss") in ok_urls
         rows.append(
             "<tr>"
             f"<td>{html.escape(partner['org'])}</td>"
             f"<td>{html.escape(partner.get('kind') or '')}</td>"
-            f"<td>{'Yes' if partner.get('rss') else 'No'}</td>"
+            f"<td>{'Yes' if rss_ok else 'No'}</td>"
             f"<td>{home_html}</td>"
             "</tr>"
         )
 
     html_out = (
         template.replace("{{NOW}}", html.escape(now))
-        .replace("{{PARTNER_COUNT}}", str(len(partner_stories)))
-        .replace("{{OTHER_COUNT}}", str(len(other_stories)))
-        .replace("{{PARTNER_RSS_COUNT}}", str(len(with_rss)))
+        .replace("{{PARTNER_COUNT}}", str(len(shown_partners)))
+        .replace("{{OTHER_COUNT}}", str(len(shown_other)))
+        .replace("{{PARTNER_RSS_COUNT}}", str(len(working_partners)))
         .replace("{{PARTNER_TOTAL}}", str(len(partners)))
         .replace("{{DNR_FEED_COUNT}}", str(len(dnr_feeds)))
         .replace(
             "{{PARTNER_ITEMS}}",
-            "\n".join(story_li(s, True) for s in partner_stories[:MAX_LIST]),
+            "\n".join(story_li(s, True) for s in shown_partners),
         )
         .replace(
             "{{OTHER_ITEMS}}",
-            "\n".join(story_li(s, False) for s in other_stories[:MAX_LIST]),
+            "\n".join(story_li(s, False) for s in shown_other),
         )
         .replace("{{COVERAGE_ROWS}}", "".join(rows))
     )
