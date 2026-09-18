@@ -54,11 +54,13 @@ def parse_when(entry) -> datetime | None:
     return None
 
 
-def fetch_feed(session: requests.Session, url: str, source: str) -> list[dict]:
+def fetch_feed(session: requests.Session, url: str, source: str) -> dict:
+    result = {"source": source, "url": url, "ok": False, "items": [], "error": None}
     try:
         response = session.get(url, timeout=TIMEOUT, allow_redirects=True)
         if response.status_code >= 400:
-            return []
+            result["error"] = f"http {response.status_code}"
+            return result
         parsed = feedparser.parse(response.content)
         cutoff = datetime.now(timezone.utc) - timedelta(hours=LOOKBACK_HOURS)
         items = []
@@ -67,29 +69,43 @@ def fetch_feed(session: requests.Session, url: str, source: str) -> list[dict]:
             link = (entry.get("link") or "").strip()
             if not title or not link:
                 continue
+            if urlparse(link).scheme not in ("http", "https"):
+                continue
             when = parse_when(entry)
-            if when and when < cutoff:
+            if when is None or when < cutoff:
                 continue
             items.append(
                 {
                     "title": title,
                     "url": link,
-                    "when": when.isoformat() if when else None,
+                    "when": when.isoformat(),
                     "source": source,
                 }
             )
-        return items
-    except Exception:
-        return []
+        result["ok"] = True
+        result["items"] = items
+        return result
+    except Exception as exc:
+        result["error"] = type(exc).__name__
+        return result
 
 
 def fmt_when(iso: str | None) -> str:
     if not iso:
         return ""
     try:
-        return datetime.fromisoformat(iso).astimezone().strftime("%a %-I:%M %p")
+        dt = datetime.fromisoformat(iso).astimezone()
+        hour = dt.strftime("%I").lstrip("0") or "12"
+        return f"{dt.strftime('%a')} {hour}:{dt.strftime('%M %p')}"
     except Exception:
         return iso[:16]
+
+
+def fmt_now(dt: datetime) -> str:
+    hour = dt.strftime("%I").lstrip("0") or "12"
+    return (
+        f"{dt.strftime('%A, %B')} {dt.day}, {dt.year}, {hour}:{dt.strftime('%M %p %Z')}"
+    )
 
 
 def story_li(story: dict, partner: bool) -> str:
@@ -148,13 +164,26 @@ def main() -> None:
     session = requests.Session()
     session.headers.update({"User-Agent": UA})
     stories: list[dict] = []
+    failures: list[dict] = []
     with ThreadPoolExecutor(max_workers=16) as pool:
         futs = {
             pool.submit(fetch_feed, session, url, name): (url, name)
             for url, name in jobs
         }
         for fut in as_completed(futs):
-            stories.extend(fut.result())
+            result = fut.result()
+            if result["ok"]:
+                stories.extend(result["items"])
+            else:
+                failures.append(result)
+    if failures:
+        print(f"feed failures: {len(failures)}/{len(jobs)}")
+        for failure in failures[:12]:
+            print(f"  {failure['source']}: {failure['error']}")
+    if failures and len(failures) * 2 >= len(jobs):
+        raise SystemExit("too many feed failures to publish a snapshot")
+    if not stories:
+        raise SystemExit("no stories fetched")
 
     partner_names = {p["org"].lower() for p in partners}
     partner_domains = set()
@@ -176,7 +205,7 @@ def main() -> None:
     partner_stories = [s for s in unique if s["partner"]]
     other_stories = [s for s in unique if not s["partner"]]
     with_rss = [p for p in partners if p.get("rss")]
-    now = datetime.now().astimezone().strftime("%A, %B %-d, %Y, %-I:%M %p %Z")
+    now = fmt_now(datetime.now().astimezone())
 
     rows = []
     for partner in partners:
