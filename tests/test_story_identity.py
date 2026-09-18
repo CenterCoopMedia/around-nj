@@ -17,6 +17,15 @@ def test_canonical_url_collapses_duplicates():
     )
 
 
+def test_canonical_url_keeps_identity_query_and_drops_tracking():
+    assert canonical_url("https://youtube.com/watch?v=first") != canonical_url(
+        "https://youtube.com/watch?v=second"
+    )
+    assert canonical_url(
+        "https://example.com/story?utm_source=x&id=1"
+    ) == canonical_url("https://example.com/story?id=1")
+
+
 def test_partner_match_uses_normalized_source_not_url():
     names = {"Montclair Local", "Village Green"}
     assert is_partner(

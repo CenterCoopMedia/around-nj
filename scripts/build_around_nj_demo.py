@@ -17,7 +17,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from email.utils import parsedate_to_datetime
 from pathlib import Path
-from urllib.parse import urljoin, urlparse
+from urllib.parse import parse_qsl, urlencode, urljoin, urlparse
 from zoneinfo import ZoneInfo
 
 import feedparser
@@ -30,6 +30,17 @@ LOOKBACK_HOURS = 72
 TIMEOUT = 10
 DEADLINE_SECONDS = 15
 MAX_BODY_BYTES = 2_000_000
+TRACKING_QUERY = {
+    "utm_source",
+    "utm_medium",
+    "utm_campaign",
+    "utm_term",
+    "utm_content",
+    "fbclid",
+    "gclid",
+    "mc_cid",
+    "mc_eid",
+}
 UA = "CCM-AroundNJ/0.3 (+https://centerforcooperativemedia.org)"
 MAX_LIST = 80
 MAX_REDIRECTS = 3
@@ -74,42 +85,55 @@ def pinned_addrinfo(host: str, port: int):
     return chosen
 
 
-def fetch_url_bytes(url: str, hops: int = 0) -> tuple[int, bytes]:
+def remaining_timeout(deadline: float) -> float:
+    left = deadline - time.monotonic()
+    if left <= 0:
+        raise TimeoutError("deadline")
+    return min(TIMEOUT, left)
+
+
+def fetch_url_bytes(
+    url: str, hops: int = 0, deadline: float | None = None
+) -> tuple[int, bytes]:
     if hops > MAX_REDIRECTS:
         raise ValueError("too many redirects")
+    if deadline is None:
+        deadline = time.monotonic() + DEADLINE_SECONDS
     parsed = urlparse(url)
     if parsed.scheme not in ("http", "https") or not parsed.hostname:
         raise ValueError("blocked host")
     port = parsed.port or (443 if parsed.scheme == "https" else 80)
     family, socktype, proto, sockaddr = pinned_addrinfo(parsed.hostname, port)
     sock = socket.socket(family, socktype, proto)
-    sock.settimeout(TIMEOUT)
+    sock.settimeout(remaining_timeout(deadline))
     sock.connect(sockaddr)
+    sock.settimeout(remaining_timeout(deadline))
     if parsed.scheme == "https":
         ctx = ssl.create_default_context()
         sock = ctx.wrap_socket(sock, server_hostname=parsed.hostname)
+        sock.settimeout(remaining_timeout(deadline))
+    timeout = remaining_timeout(deadline)
     if parsed.scheme == "https":
-        conn = http.client.HTTPSConnection(parsed.hostname, port, timeout=TIMEOUT)
+        conn = http.client.HTTPSConnection(parsed.hostname, port, timeout=timeout)
     else:
-        conn = http.client.HTTPConnection(parsed.hostname, port, timeout=TIMEOUT)
+        conn = http.client.HTTPConnection(parsed.hostname, port, timeout=timeout)
     conn.sock = sock
     path = parsed.path or "/"
     if parsed.query:
         path += "?" + parsed.query
     conn.request("GET", path, headers={"User-Agent": UA, "Host": parsed.hostname})
+    sock.settimeout(remaining_timeout(deadline))
     response = conn.getresponse()
     try:
         if response.status in {301, 302, 303, 307, 308}:
             location = response.getheader("Location")
             if not location:
                 raise ValueError("redirect without location")
-            return fetch_url_bytes(urljoin(url, location), hops + 1)
-        started = time.monotonic()
+            return fetch_url_bytes(urljoin(url, location), hops + 1, deadline)
         chunks: list[bytes] = []
         size = 0
         while True:
-            if time.monotonic() - started > DEADLINE_SECONDS:
-                raise TimeoutError("deadline")
+            sock.settimeout(remaining_timeout(deadline))
             chunk = response.read(65536)
             if not chunk:
                 break
@@ -150,7 +174,13 @@ def canonical_url(url: str) -> str:
     host = domain(url)
     path = (parsed.path or "/").rstrip("/") or "/"
     scheme = "https" if parsed.scheme in {"http", "https"} else parsed.scheme
-    return f"{scheme}://{host}{path}"
+    kept = [
+        (key, value)
+        for key, value in parse_qsl(parsed.query, keep_blank_values=True)
+        if key.lower() not in TRACKING_QUERY
+    ]
+    query = urlencode(kept)
+    return f"{scheme}://{host}{path}" + (f"?{query}" if query else "")
 
 
 def valid_story_link(link: str) -> str | None:
@@ -197,7 +227,7 @@ def parse_when(entry) -> datetime | None:
     return None
 
 
-def fetch_feed(url: str, source: str) -> dict:
+def fetch_feed(url: str, source: str, partner: bool = False) -> dict:
     result = {"source": source, "url": url, "ok": False, "items": [], "error": None}
     try:
         status, body = fetch_url_bytes(url)
@@ -228,6 +258,7 @@ def fetch_feed(url: str, source: str) -> dict:
                     "url": link,
                     "when": when.isoformat(),
                     "source": source,
+                    "partner": partner,
                 }
             )
         result["ok"] = True
@@ -325,21 +356,46 @@ def main() -> None:
                     continue
             dnr_feeds.append({**feed, "rss_url": url})
 
-    jobs = [(f["rss_url"], f["name"]) for f in dnr_feeds]
-    seen = {url for url, _ in jobs}
+    partner_rss = {p["rss"] for p in partners if p.get("rss")}
+    partner_feed_hosts = set()
+    for partner in partners:
+        if partner.get("star_domain"):
+            partner_feed_hosts.add(partner["star_domain"].lower().removeprefix("www."))
+        if partner.get("home"):
+            host = domain(partner["home"])
+            if host:
+                partner_feed_hosts.add(host)
+
+    def feed_is_partner(url: str, name: str) -> bool:
+        if url in partner_rss:
+            return True
+        host = domain(url)
+        if host and (
+            host in partner_feed_hosts
+            or any(host == h or host.endswith("." + h) for h in partner_feed_hosts)
+        ):
+            return True
+        return is_partner({"source": name, "url": url}, {p["org"] for p in partners})
+
+    jobs = [
+        (f["rss_url"], f["name"], feed_is_partner(f["rss_url"], f["name"]))
+        for f in dnr_feeds
+    ]
+    seen = {url for url, _, _ in jobs}
     for partner in partners:
         rss = partner.get("rss")
-        if partner.get("snapshot") is False:
-            continue
         if rss and rss not in seen:
-            jobs.append((rss, partner["org"]))
+            jobs.append((rss, partner["org"], True))
             seen.add(rss)
 
     stories: list[dict] = []
     failures: list[dict] = []
     ok_urls: set[str] = set()
     with ThreadPoolExecutor(max_workers=16) as pool:
-        futs = {pool.submit(fetch_feed, url, name): (url, name) for url, name in jobs}
+        futs = {
+            pool.submit(fetch_feed, url, name, partner): (url, name)
+            for url, name, partner in jobs
+        }
         for fut in as_completed(futs):
             result = fut.result()
             if result["ok"]:
@@ -377,7 +433,9 @@ def main() -> None:
         if key in seen_urls:
             continue
         seen_urls.add(key)
-        story["partner"] = is_partner(story, partner_names)
+        story["partner"] = bool(story.get("partner")) or is_partner(
+            story, partner_names
+        )
         unique.append(story)
 
     partner_stories = [s for s in unique if s["partner"]]
@@ -386,7 +444,7 @@ def main() -> None:
     shown_other = other_stories[:MAX_LIST]
     working_partners = [p for p in partners if p.get("rss") in ok_urls]
     now = fmt_now(datetime.now().astimezone())
-    tapinto_jobs = [url for url, _ in jobs if "tapinto.net" in url]
+    tapinto_jobs = [url for url, _, _ in jobs if "tapinto.net" in url]
     tapinto_stories = [s for s in unique if "tapinto.net" in (s.get("url") or "")]
     tapinto_403 = [
         f
