@@ -155,7 +155,11 @@ footer {
     <p class="lede">Headlines from New Jersey newsrooms, with News Commons partners marked. Built from the Daily News Roundup archive plus the organizations that signed up to work with NJ PBS.</p>
     <p class="meta">Demo snapshot · Friday, September 18, 2026, 12:01 PM EDT · last 72 hours · not a live product</p>
     <div class="stats">
-    <div class="stat"><b>96</b><span>Partner headlines</span></div>
+      <div class="stat"><b>96</b><span>Partner headlines</span></div>
+      <div class="stat"><b>294</b><span>Other NJ headlines</span></div>
+      <div class="stat"><b>20</b><span>Partner feeds found</span></div>
+      <div class="stat"><b>67</b><span>Statewide DNR feeds</span></div>
+    </div>
     <div class="filters" role="group" aria-label="Filter headlines">
       <button type="button" data-filter="all" aria-pressed="true">All stories</button>
       <button type="button" data-filter="partners" aria-pressed="false">Partners only</button>
@@ -356,6 +360,8 @@ footer {
         const partners = btn.dataset.filter === "partners";
         document.body.classList.toggle("partners-only", partners);
         buttons.forEach((other) => other.setAttribute("aria-pressed", String(other === btn)));
+        const otherBlock = document.getElementById("other-block");
+        if (otherBlock) otherBlock.hidden = partners;
       });
     });
   </script>
