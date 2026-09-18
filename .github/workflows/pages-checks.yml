@@ -3,11 +3,11 @@ on:
   pull_request:
     branches: [gh-pages]
   push:
-    branches: [gh-pages]
+    branches: [gh-pages, joe/around-nj-news-desk]
 permissions:
   contents: read
 concurrency:
-  group: news-desk-${{ github.ref }}
+  group: news-desk-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 jobs:
   news-desk:
