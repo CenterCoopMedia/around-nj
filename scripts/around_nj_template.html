@@ -164,7 +164,7 @@ footer {
   </header>
   <main>
     <h1>Around New Jersey</h1>
-    <p class="lede">Headlines from New Jersey newsrooms, with News Commons partners marked. Built from the Daily News Roundup archive plus the organizations that signed up to work with NJ PBS.</p>
+    <p class="lede">Headlines from New Jersey newsrooms, with News Commons partners marked. Built from the Daily News Roundup feed list plus the organizations that signed up to work with NJ PBS.</p>
     <p class="meta">Demo snapshot · {{NOW}} · last 72 hours · not a live product</p>
     <div class="stats">
       <div class="stat"><b>{{PARTNER_COUNT}}</b><span>Partner headlines</span></div>
@@ -178,7 +178,7 @@ footer {
     </div>
     <section id="partner-block">
       <h2>Partner headlines</h2>
-      <p class="note">These came from organizations on the NJ PBS invitation list. Showing {{PARTNER_SHOWN}} of {{PARTNER_COUNT}}. Duplicate URLs are removed. TAPinto RSS currently returns 403, so that network is not in this snapshot.</p>
+      <p class="note">These came from organizations on the NJ PBS invitation list. Showing {{PARTNER_SHOWN}} of {{PARTNER_COUNT}}. Duplicate URLs are removed. {{TAPINTO_NOTE}}</p>
       <ul class="stories">
 {{PARTNER_ITEMS}}
       </ul>

@@ -34,7 +34,13 @@ UA = "CCM-AroundNJ/0.3 (+https://centerforcooperativemedia.org)"
 MAX_LIST = 80
 MAX_REDIRECTS = 3
 NJ_TZ = ZoneInfo("America/New_York")
-EXPECTED_FAILURE_PREFIXES = ("http 403",)
+EXPECTED_FAILURES = (
+    ("tapinto.net", "http 403"),
+    ("northjersey.com", "http 404"),
+    ("app.com", "http 404"),
+    ("dailyrecord.com", "http 404"),
+    ("courierpostonline.com", "http 404"),
+)
 
 
 TOKEN_RE = re.compile(r"\{\{[A-Z_]+\}\}")
@@ -114,6 +120,16 @@ def fetch_url_bytes(url: str, hops: int = 0) -> tuple[int, bytes]:
         return response.status, b"".join(chunks)
     finally:
         conn.close()
+
+
+def is_expected_failure(url: str, error: str) -> bool:
+    host = domain(url)
+    err = (error or "").lower()
+    for suffix, expected in EXPECTED_FAILURES:
+        if host == suffix or host.endswith("." + suffix):
+            if err.startswith(expected):
+                return True
+    return False
 
 
 def domain(url: str | None) -> str:
@@ -300,7 +316,7 @@ def main() -> None:
         expected = [
             f
             for f in failures
-            if str(f.get("error") or "").startswith(EXPECTED_FAILURE_PREFIXES)
+            if is_expected_failure(str(f.get("url") or ""), str(f.get("error") or ""))
         ]
         unexpected = [f for f in failures if f not in expected]
         print(f"feed failures: {len(failures)}/{len(jobs)}")
@@ -340,6 +356,24 @@ def main() -> None:
     shown_other = other_stories[:MAX_LIST]
     working_partners = [p for p in partners if p.get("rss") in ok_urls]
     now = fmt_now(datetime.now().astimezone())
+    tapinto_jobs = [url for url, _ in jobs if "tapinto.net" in url]
+    tapinto_stories = [s for s in unique if "tapinto.net" in (s.get("url") or "")]
+    tapinto_403 = [
+        f
+        for f in failures
+        if "tapinto.net" in str(f.get("url") or "")
+        and str(f.get("error") or "").startswith("http 403")
+    ]
+    if tapinto_stories:
+        tapinto_note = (
+            "This build includes TAPinto headlines from feeds that responded."
+        )
+    elif tapinto_jobs and len(tapinto_403) == len(tapinto_jobs):
+        tapinto_note = "TAPinto RSS returned 403 in this build, so that network is not in this snapshot."
+    elif tapinto_jobs:
+        tapinto_note = "TAPinto feeds did not yield headlines in this build."
+    else:
+        tapinto_note = "No TAPinto feeds were queued in this build."
 
     rows = []
     for partner in partners:
@@ -373,6 +407,7 @@ def main() -> None:
             "{{PARTNER_ITEMS}}": "\n".join(story_li(s, True) for s in shown_partners),
             "{{OTHER_ITEMS}}": "\n".join(story_li(s, False) for s in shown_other),
             "{{COVERAGE_ROWS}}": "".join(rows),
+            "{{TAPINTO_NOTE}}": tapinto_note,
         },
     )
     out = Path(args.output)
