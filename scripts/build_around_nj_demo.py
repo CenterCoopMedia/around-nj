@@ -230,18 +230,41 @@ def norm_name(value: str) -> str:
     return re.sub(r"[^a-z0-9]+", " ", text).strip()
 
 
+def parse_published_text(raw: str) -> datetime | None:
+    text = raw.strip()
+    if not text:
+        return None
+    iso = text.replace("Z", "+00:00")
+    try:
+        dt = datetime.fromisoformat(iso)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=NJ_TZ)
+        return dt.astimezone(timezone.utc)
+    except ValueError:
+        pass
+    try:
+        dt = parsedate_to_datetime(text)
+        if dt.tzinfo is None:
+            dt = dt.replace(tzinfo=timezone.utc)
+        return dt.astimezone(timezone.utc)
+    except Exception:
+        pass
+    for fmt in ("%Y-%m-%d", "%B %d, %Y", "%b %d, %Y", "%m/%d/%Y"):
+        try:
+            dt = datetime.strptime(text, fmt).replace(tzinfo=NJ_TZ)
+            return dt.astimezone(timezone.utc)
+        except ValueError:
+            continue
+    return None
+
+
 def parse_when(entry) -> datetime | None:
     for key in ("published", "updated"):
         raw = entry.get(key)
-        if not raw:
-            continue
-        try:
-            dt = parsedate_to_datetime(raw)
-            if dt.tzinfo is None:
-                dt = dt.replace(tzinfo=timezone.utc)
-            return dt.astimezone(timezone.utc)
-        except Exception:
-            pass
+        if isinstance(raw, str):
+            parsed = parse_published_text(raw)
+            if parsed is not None:
+                return parsed
     for key in ("published_parsed", "updated_parsed"):
         parsed = entry.get(key)
         if parsed:
@@ -513,9 +536,7 @@ def main() -> None:
                 if not link or not title:
                     continue
                 when = parse_when({"published": item.get("published")})
-                if when is None:
-                    when = datetime.now(timezone.utc)
-                if when < cutoff:
+                if when is None or when < cutoff:
                     continue
                 stories.append(
                     {

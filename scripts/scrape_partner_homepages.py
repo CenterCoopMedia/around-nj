@@ -84,18 +84,26 @@ def scrape_home(url: str, schema: Path) -> dict:
             "-o",
             str(out),
         ]
-        proc = subprocess.run(
-            cmd,
-            capture_output=True,
-            text=True,
-            timeout=TIMEOUT_SECONDS,
-            env=os.environ.copy(),
-        )
+        try:
+            proc = subprocess.run(
+                cmd,
+                capture_output=True,
+                text=True,
+                timeout=TIMEOUT_SECONDS,
+                env=os.environ.copy(),
+            )
+        except subprocess.TimeoutExpired:
+            return {"ok": False, "stories": [], "error": "timeout"}
+        except OSError as exc:
+            return {"ok": False, "stories": [], "error": type(exc).__name__}
         if proc.returncode != 0 or not out.exists():
             err = (proc.stderr or proc.stdout or "scrape failed").strip().splitlines()
             safe = err[-1][:160] if err else "scrape failed"
             return {"ok": False, "stories": [], "error": safe}
-        payload = json.loads(out.read_text(encoding="utf-8"))
+        try:
+            payload = json.loads(out.read_text(encoding="utf-8"))
+        except json.JSONDecodeError:
+            return {"ok": False, "stories": [], "error": "invalid json"}
         stories = parse_firecrawl_payload(payload)
         return {"ok": True, "stories": stories, "error": None}
 
@@ -133,7 +141,10 @@ def main() -> None:
     for partner in targets:
         url = partner["scrape"]
         print(f"scrape {partner['org']}: {url}", flush=True)
-        hit = scrape_home(url, schema)
+        try:
+            hit = scrape_home(url, schema)
+        except Exception as exc:
+            hit = {"ok": False, "stories": [], "error": type(exc).__name__}
         results.append(
             {
                 "org": partner["org"],
