@@ -1,11 +1,10 @@
 """RSS feed fetcher for NJ news sources."""
 
 import json
-import os
 from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Optional
-from urllib.parse import urlparse, urlencode, parse_qs, urlunparse
+from urllib.parse import urlparse
 
 import feedparser
 
@@ -36,22 +35,22 @@ def transform_url(url: str, source_name: str) -> str:
 
 # Patterns that indicate generic broadcasts/roundups to skip
 SKIP_HEADLINE_PATTERNS = [
-    "newscast for",           # "WHYY Newscast for Tuesday, 11:00 a.m."
-    "morning edition",        # Generic morning shows
+    "newscast for",  # "WHYY Newscast for Tuesday, 11:00 a.m."
+    "morning edition",  # Generic morning shows
     "evening edition",
     "daily briefing",
-    "news roundup for",       # Generic daily roundups
-    "weather forecast for",   # Generic weather forecasts (not weather news)
+    "news roundup for",  # Generic daily roundups
+    "weather forecast for",  # Generic weather forecasts (not weather news)
     "traffic report",
-    "this week on",           # Weekly show promos
+    "this week on",  # Weekly show promos
     "tonight on",
-    "podcast:",               # Podcast episode announcements
+    "podcast:",  # Podcast episode announcements
     "listen:",
     "watch:",
     "live stream",
     "livestream",
-    "nj spotlight news:",     # "NJ Spotlight News: December 15, 2025"
-    "whyy news:",             # Similar date-based broadcasts
+    "nj spotlight news:",  # "NJ Spotlight News: December 15, 2025"
+    "whyy news:",  # Similar date-based broadcasts
     "njtv news:",
 ]
 
@@ -103,9 +102,9 @@ def parse_feed(url: str, source_name: str, hours_back: int = 24) -> list[dict]:
         for entry in feed.entries:
             # Parse published date
             published = None
-            if hasattr(entry, 'published_parsed') and entry.published_parsed:
+            if hasattr(entry, "published_parsed") and entry.published_parsed:
                 published = datetime(*entry.published_parsed[:6])
-            elif hasattr(entry, 'updated_parsed') and entry.updated_parsed:
+            elif hasattr(entry, "updated_parsed") and entry.updated_parsed:
                 published = datetime(*entry.updated_parsed[:6])
 
             # Skip old articles if we have a date
@@ -127,7 +126,9 @@ def parse_feed(url: str, source_name: str, hours_back: int = 24) -> list[dict]:
                 "url": transformed_url,
                 "source": source_name,
                 "published": published.isoformat() if published else None,
-                "summary": entry.get("summary", "")[:500] if entry.get("summary") else None
+                "summary": entry.get("summary", "")[:500]
+                if entry.get("summary")
+                else None,
             }
 
             # Only add if we have title and URL
@@ -141,7 +142,9 @@ def parse_feed(url: str, source_name: str, hours_back: int = 24) -> list[dict]:
         return []
 
 
-def fetch_all_feeds(hours_back: int = 24, priority_filter: Optional[int] = None) -> list[dict]:
+def fetch_all_feeds(
+    hours_back: int = 24, priority_filter: Optional[int] = None
+) -> list[dict]:
     """
     Fetch articles from all configured RSS feeds.
 

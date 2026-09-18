@@ -17,8 +17,8 @@ from typing import Optional
 import google.generativeai as genai
 from dotenv import load_dotenv
 
-if sys.platform == 'win32':
-    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if sys.platform == "win32":
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
 load_dotenv()
 
@@ -64,6 +64,7 @@ Respond with valid JSON only, no markdown."""
 
         # Try to parse as JSON
         import json
+
         if response_text.startswith("```"):
             response_text = response_text.split("```")[1]
             if response_text.startswith("json"):
@@ -82,14 +83,12 @@ Respond with valid JSON only, no markdown."""
             "error": str(e),
             "summary": None,
             "topics": [],
-            "location": None
+            "location": None,
         }
 
 
 def enrich_stories_batch(
-    stories: list[dict],
-    max_stories: int = 20,
-    delay: float = 0.5
+    stories: list[dict], max_stories: int = 20, delay: float = 0.5
 ) -> list[dict]:
     """
     Enrich multiple stories with URL context.
@@ -162,7 +161,7 @@ if __name__ == "__main__":
     # Test with a sample URL
     test_urls = [
         "https://www.nj.com/politics/2025/12/casino-smoking-battle-faces-fresh-scrutiny-as-judges-cite-new-science-new-realities.html?outputType=amp",
-        "https://newjerseymonitor.com/2025/12/16/nj-paid-family-leave-small-businesses/"
+        "https://newjerseymonitor.com/2025/12/16/nj-paid-family-leave-small-businesses/",
     ]
 
     print("=" * 60)

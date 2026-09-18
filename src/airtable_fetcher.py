@@ -14,16 +14,13 @@ load_dotenv()
 def get_airtable_table():
     """Get the Airtable table object."""
     api = Api(os.getenv("AIRTABLE_PAT"))
-    return api.table(
-        os.getenv("AIRTABLE_BASE_ID"),
-        os.getenv("AIRTABLE_TABLE_ID")
-    )
+    return api.table(os.getenv("AIRTABLE_BASE_ID"), os.getenv("AIRTABLE_TABLE_ID"))
 
 
 def fetch_submissions(
     days_back: int = 7,
     section_filter: Optional[str] = None,
-    include_unassigned: bool = True
+    include_unassigned: bool = True,
 ) -> list[dict]:
     """
     Fetch story submissions from Airtable.
@@ -40,7 +37,6 @@ def fetch_submissions(
 
     # Calculate cutoff date
     cutoff = datetime.now() - timedelta(days=days_back)
-    cutoff_str = cutoff.strftime("%Y-%m-%d")
 
     # Build formula for filtering
     # Note: Airtable date filtering can be tricky; we'll filter in Python too
@@ -66,7 +62,7 @@ def fetch_submissions(
                 record_date = datetime.fromisoformat(date_added.replace("Z", "+00:00"))
                 if record_date.replace(tzinfo=None) < cutoff:
                     continue
-            except:
+            except Exception:
                 pass
 
         # Skip if no section and we're not including unassigned
@@ -84,7 +80,7 @@ def fetch_submissions(
             "submitter_name": fields.get("Name", ""),
             "submitter_email": fields.get("Email", ""),
             "date_added": date_added,
-            "from_airtable": True
+            "from_airtable": True,
         }
 
         # Only include if we have headline and URL
@@ -114,7 +110,7 @@ def fetch_unprocessed_submissions() -> list[dict]:
             "section": r["fields"].get("Section"),
             "summary": r["fields"].get("Summary", ""),
             "date_added": r["fields"].get("Date added"),
-            "from_airtable": True
+            "from_airtable": True,
         }
         for r in records
         if r["fields"].get("Headline") and r["fields"].get("URL")
@@ -191,7 +187,7 @@ def update_submissions_batch(updates: list[dict]) -> dict:
         success = update_submission(
             record_id=record_id,
             source=update.get("source"),
-            section=update.get("section")
+            section=update.get("section"),
         )
 
         if success:
@@ -220,7 +216,7 @@ def get_submissions_by_section() -> dict[str, list[dict]]:
         "Health + safety": [],
         "Climate + environment": [],
         "Lastly": [],
-        "Unassigned": []
+        "Unassigned": [],
     }
 
     for sub in submissions:
@@ -241,7 +237,7 @@ SECTION_MAP = {
     "Work + education": "education",
     "Health + safety": "health",
     "Climate + environment": "environment",
-    "Lastly": "lastly"
+    "Lastly": "lastly",
 }
 
 # Reverse map
@@ -252,8 +248,8 @@ if __name__ == "__main__":
     import sys
 
     # Fix Windows console encoding
-    if sys.platform == 'win32':
-        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    if sys.platform == "win32":
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
     print("=" * 60)
     print("AIRTABLE SUBMISSIONS TEST")

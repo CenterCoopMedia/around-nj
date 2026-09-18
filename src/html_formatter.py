@@ -28,7 +28,7 @@ def format_story(headline: str, url: str, source: str) -> str:
     # Clean headline
     headline = headline.strip()
     # Remove any existing HTML tags
-    headline = re.sub(r'<[^>]+>', '', headline)
+    headline = re.sub(r"<[^>]+>", "", headline)
 
     return f'<li>{headline} (<a href="{url}">{source}</a>)</li>'
 
@@ -45,14 +45,11 @@ def format_grouped_story(headline: str, sources: list[tuple[str, str]]) -> str:
         HTML string with multiple source links
     """
     headline = headline.strip()
-    headline = re.sub(r'<[^>]+>', '', headline)
+    headline = re.sub(r"<[^>]+>", "", headline)
 
-    source_links = ", ".join([
-        f'<a href="{url}">{name}</a>'
-        for name, url in sources
-    ])
+    source_links = ", ".join([f'<a href="{url}">{name}</a>' for name, url in sources])
 
-    return f'<li>{headline} ({source_links})</li>'
+    return f"<li>{headline} ({source_links})</li>"
 
 
 def format_section_stories(stories: list[dict], max_stories: int = 20) -> str:
@@ -83,13 +80,13 @@ def format_section_stories(stories: list[dict], max_stories: int = 20) -> str:
         if "sources" in story and isinstance(story["sources"], list):
             item = format_grouped_story(
                 headline=story.get("headline", story.get("title", "")),
-                sources=story["sources"]
+                sources=story["sources"],
             )
         else:
             item = format_story(
                 headline=story.get("headline", story.get("title", "")),
                 url=story.get("url", ""),
-                source=source
+                source=source,
             )
         items.append(item)
 
@@ -158,13 +155,12 @@ def extract_source_from_url(url: str) -> str:
                 return value
 
         return ""
-    except:
+    except Exception:
         return ""
 
 
 def build_newsletter(
-    sections: dict[str, list[dict]],
-    date: Optional[datetime] = None
+    sections: dict[str, list[dict]], date: Optional[datetime] = None
 ) -> str:
     """
     Build the complete newsletter HTML.
@@ -190,7 +186,7 @@ def build_newsletter(
         "education": "<!-- EDUCATION STORIES -->",
         "health": "<!-- HEALTH STORIES -->",
         "environment": "<!-- ENVIRONMENT STORIES -->",
-        "lastly": "<!-- LASTLY STORIES -->"
+        "lastly": "<!-- LASTLY STORIES -->",
     }
 
     # Replace each section placeholder with formatted stories
@@ -210,7 +206,9 @@ def build_newsletter(
     return template
 
 
-def preview_newsletter(sections: dict[str, list[dict]], output_path: Optional[str] = None) -> str:
+def preview_newsletter(
+    sections: dict[str, list[dict]], output_path: Optional[str] = None
+) -> str:
     """
     Generate newsletter HTML and optionally save to file for preview.
 
@@ -239,8 +237,8 @@ def count_stories(sections: dict[str, list[dict]]) -> dict[str, int]:
 if __name__ == "__main__":
     import sys
 
-    if sys.platform == 'win32':
-        sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+    if sys.platform == "win32":
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 
     # Test with sample data
     test_sections = {
@@ -248,64 +246,64 @@ if __name__ == "__main__":
             {
                 "headline": "NJ Transit announces major service expansion to Newark Airport",
                 "url": "https://example.com/1",
-                "source": "NJ.com"
+                "source": "NJ.com",
             },
             {
                 "headline": "Governor Murphy signs sweeping climate legislation",
                 "sources": [
                     ("NJ Spotlight", "https://example.com/2a"),
                     ("NJ Monitor", "https://example.com/2b"),
-                    ("WHYY", "https://example.com/2c")
-                ]
-            }
+                    ("WHYY", "https://example.com/2c"),
+                ],
+            },
         ],
         "politics": [
             {
                 "headline": "State Senate passes budget with record education funding",
                 "url": "https://example.com/3",
-                "source": "NJ Globe"
+                "source": "NJ Globe",
             }
         ],
         "housing": [
             {
                 "headline": "Jersey City approves 500-unit affordable housing development",
                 "url": "https://example.com/4",
-                "source": "Jersey Digs"
+                "source": "Jersey Digs",
             }
         ],
         "education": [
             {
                 "headline": "Rutgers announces tuition freeze for 2025-26 academic year",
                 "url": "https://example.com/5",
-                "source": "NJ.com"
+                "source": "NJ.com",
             }
         ],
         "health": [
             {
                 "headline": "New hospital opens in Camden, first in decades",
                 "url": "https://example.com/6",
-                "source": "NJ Spotlight"
+                "source": "NJ Spotlight",
             }
         ],
         "environment": [
             {
                 "headline": "Offshore wind farm begins generating power off Atlantic City coast",
                 "url": "https://example.com/7",
-                "source": "Press of Atlantic City"
+                "source": "Press of Atlantic City",
             }
         ],
         "lastly": [
             {
                 "headline": "New Jersey diner named best in America by Food Network",
                 "url": "https://example.com/8",
-                "source": "NJ Monthly"
+                "source": "NJ Monthly",
             },
             {
                 "headline": "Devils secure playoff spot with overtime win",
                 "url": "https://example.com/9",
-                "source": "NorthJersey.com"
-            }
-        ]
+                "source": "NorthJersey.com",
+            },
+        ],
     }
 
     print("=" * 60)
