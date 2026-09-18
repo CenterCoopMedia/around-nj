@@ -35,6 +35,8 @@ python scripts/build_around_nj_demo.py \
 
 Officejawn timer `around-nj-refresh.timer` runs that at 6:30am and 2:00pm Eastern. Firecrawl covers invitation-list sites with no usable RSS. Facebook pages and outlets with no homepage are still skipped.
 
+Twice-daily publishes use `[skip ci]` and do not run Playwright. Pre-merge CI on pull requests stays on. The news-desk Playwright workflow is off until NJ PBS owns Actions minutes.
+
 See `docs/around-nj-demo.md`.
 
 ## Daily News Roundup newsletter

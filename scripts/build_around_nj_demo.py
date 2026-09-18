@@ -514,7 +514,7 @@ def main() -> None:
     stories: list[dict] = []
     failures: list[dict] = []
     ok_urls: set[str] = set()
-    with ThreadPoolExecutor(max_workers=16) as pool:
+    with ThreadPoolExecutor(max_workers=4) as pool:
         futs = {
             pool.submit(fetch_feed_bounded, url, name, partner): (url, name)
             for url, name, partner in jobs
@@ -579,13 +579,13 @@ def main() -> None:
                 )
                 merged += 1
             print(f"scrape merge {org}: kept {merged}, dropped {dropped}")
+    expected = [
+        f
+        for f in failures
+        if is_expected_failure(str(f.get("url") or ""), str(f.get("error") or ""))
+    ]
+    unexpected = [f for f in failures if f not in expected]
     if failures:
-        expected = [
-            f
-            for f in failures
-            if is_expected_failure(str(f.get("url") or ""), str(f.get("error") or ""))
-        ]
-        unexpected = [f for f in failures if f not in expected]
         print(f"feed failures: {len(failures)}/{len(jobs)}")
         if expected:
             print(f"  expected: {len(expected)}")
@@ -595,8 +595,9 @@ def main() -> None:
             print(f"  unexpected: {len(unexpected)}")
             for failure in unexpected:
                 print(f"    {failure['source']}: {failure['error']}")
-    if failures and len(failures) * 2 >= len(jobs):
-        raise SystemExit("too many feed failures to publish a snapshot")
+    remaining = max(len(jobs) - len(expected), 1)
+    if unexpected and len(unexpected) * 2 >= remaining:
+        raise SystemExit("too many unexpected feed failures to publish a snapshot")
     if not stories:
         raise SystemExit("no stories fetched")
 

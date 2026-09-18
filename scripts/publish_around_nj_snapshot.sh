@@ -22,5 +22,10 @@ if git -C "$PAGES" diff --cached --quiet; then
 fi
 git -C "$PAGES" -c user.email="6799804+jamditis@users.noreply.github.com" \
   -c user.name="Joe Amditis" \
-  commit -m "Refresh Around New Jersey snapshot."
+  commit -m "$(cat <<'EOF'
+Refresh Around New Jersey snapshot.
+
+[skip ci]
+EOF
+)"
 git -C "$PAGES" push origin gh-pages

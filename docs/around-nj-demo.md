@@ -36,7 +36,9 @@ python scripts/build_around_nj_demo.py \
   --output drafts/snapshot.html
 ```
 
-Twice-daily timer (6:30am and 2:00pm Eastern): `deploy/systemd/around-nj-refresh.timer`. It builds locally. Set `AROUND_NJ_PUBLISH=1` on the service to copy `snapshot.html` onto the `gh-pages` worktree. Do not overwrite `index.html`; that file is the news desk. The desk reads `snapshot.html` for headlines.
+Twice-daily timer (6:30am and 2:00pm Eastern): `deploy/systemd/around-nj-refresh.timer`. It builds locally and publishes `snapshot.html` to the `gh-pages` worktree at `$AROUND_NJ_PAGES` (default `/home/jamditis/projects/around-nj-live`). Do not overwrite `index.html`; that file is the news desk.
+
+Publish commits include `[skip ci]`. The Playwright “News desk checks” workflow is disabled until NJ PBS owns GitHub Actions minutes. Pre-merge CI on `master` (ruff, pytest, gitleaks, `CI gate`) stays on. GitHub Pages still has to run its own static deploy so the public URL updates.
 
 ## Rebuild
 
