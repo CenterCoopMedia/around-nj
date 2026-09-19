@@ -7,7 +7,7 @@ Wants=network-online.target
 Type=oneshot
 WorkingDirectory=/home/jamditis/projects/dnr
 Environment=AROUND_NJ_PUBLISH=1
-Environment=AROUND_NJ_PAGES=/home/jamditis/projects/around-nj-pages
+Environment=AROUND_NJ_PAGES=/home/jamditis/projects/around-nj-live
 ExecStart=/home/jamditis/projects/dnr/scripts/run_around_nj_refresh.sh
 StandardOutput=journal
 StandardError=journal
