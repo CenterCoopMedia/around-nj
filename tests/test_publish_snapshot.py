@@ -6,7 +6,9 @@ import os
 import subprocess
 from pathlib import Path
 
-SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "publish_around_nj_snapshot.sh"
+SCRIPT = (
+    Path(__file__).resolve().parents[1] / "scripts" / "publish_around_nj_snapshot.sh"
+)
 
 
 def _run(cmd, cwd=None, check=True, env=None):
@@ -109,6 +111,27 @@ def test_fast_forwards_then_publishes_snapshot_only(tmp_path):
     assert _remote_file(remote, "snapshot.html") == "new snapshot\n"
     assert _remote_file(remote, "index.html") == "desk\n"
     assert _remote_file(remote, "README.md") == "skip ci\n"
+
+
+def test_replaces_snapshot_symlink_without_following_it(tmp_path):
+    remote, pages = _init_pages_remote(tmp_path)
+    victim = tmp_path / "victim.txt"
+    victim.write_text("keep me\n", encoding="utf-8")
+    (pages / "snapshot.html").unlink()
+    (pages / "snapshot.html").symlink_to(victim)
+    _git(pages, "add", "-A")
+    _git(pages, "commit", "-m", "symlink")
+    _git(pages, "push", "origin", "gh-pages")
+
+    snapshot = tmp_path / "new.html"
+    snapshot.write_text("new snapshot\n", encoding="utf-8")
+    result = _publish(tmp_path, snapshot)
+
+    assert result.returncode == 0, result.stderr
+    assert victim.read_text(encoding="utf-8") == "keep me\n"
+    assert not (pages / "snapshot.html").is_symlink()
+    assert (pages / "snapshot.html").read_text(encoding="utf-8") == "new snapshot\n"
+    assert _remote_file(remote, "snapshot.html") == "new snapshot\n"
 
 
 def test_no_snapshot_changes_exits_zero(tmp_path):

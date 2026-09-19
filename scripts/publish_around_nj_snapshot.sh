@@ -23,7 +23,17 @@ fi
 git -C "$PAGES" fetch origin refs/heads/gh-pages:refs/remotes/origin/gh-pages
 git -C "$PAGES" merge --ff-only origin/gh-pages
 
-cp "$SNAPSHOT" "$PAGES/snapshot.html"
+dest="$PAGES/snapshot.html"
+if [ -e "$dest" ] && [ ! -f "$dest" ] && [ ! -L "$dest" ]; then
+  echo "refusing to replace non-file $dest" >&2
+  exit 1
+fi
+tmp="$(mktemp "$PAGES/snapshot.html.tmp.XXXXXX")"
+cp "$SNAPSHOT" "$tmp"
+if [ -L "$dest" ]; then
+  rm -f "$dest"
+fi
+mv -f "$tmp" "$dest"
 git -C "$PAGES" add snapshot.html
 if git -C "$PAGES" diff --cached --quiet; then
   echo "no snapshot changes"
