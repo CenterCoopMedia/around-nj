@@ -3,7 +3,7 @@
 set -euo pipefail
 
 SNAPSHOT="${1:?snapshot html path}"
-PAGES="${AROUND_NJ_PAGES:-$HOME/projects/around-nj-pages}"
+PAGES="${AROUND_NJ_PAGES:-$HOME/projects/around-nj-live}"
 
 if [ ! -f "$SNAPSHOT" ]; then
   echo "missing snapshot $SNAPSHOT" >&2
@@ -13,6 +13,15 @@ if ! git -C "$PAGES" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   echo "missing gh-pages worktree at $PAGES" >&2
   exit 1
 fi
+
+branch="$(git -C "$PAGES" branch --show-current)"
+if [ "$branch" != "gh-pages" ]; then
+  echo "AROUND_NJ_PAGES must be checked out on gh-pages (got ${branch:-detached} at $PAGES)" >&2
+  exit 1
+fi
+
+git -C "$PAGES" fetch origin refs/heads/gh-pages:refs/remotes/origin/gh-pages
+git -C "$PAGES" merge --ff-only origin/gh-pages
 
 cp "$SNAPSHOT" "$PAGES/snapshot.html"
 git -C "$PAGES" add snapshot.html
@@ -28,4 +37,4 @@ Refresh Around New Jersey snapshot.
 [skip ci]
 EOF
 )"
-git -C "$PAGES" push origin gh-pages
+git -C "$PAGES" push origin HEAD:gh-pages
