@@ -61,6 +61,7 @@ def story_row(url):
 def test_boardwalk_record_skips_a_nondefault_port():
     assert boardwalk_record(story_row("https://example.com:8443/story")) is None
     assert boardwalk_record(story_row("https://exa mple.com/story")) is None
+    assert boardwalk_record(story_row("https://[::ffff:192.0.2.1]/story")) is None
     assert boardwalk_record(story_row("https://example.com:abc/story")) is None
     assert boardwalk_record(story_row("https://example.com:80/story")) is None
     assert boardwalk_record(story_row("http://example.com:443/story")) is None

@@ -469,6 +469,8 @@ def boardwalk_port_ok(url: str) -> bool:
         host = parsed.hostname or ""
     except ValueError:
         return False
+    if ":" in host:
+        return False
     if any(
         character.isspace() or ord(character) < 32 or ord(character) == 127
         for character in host
