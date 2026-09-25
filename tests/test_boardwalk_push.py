@@ -45,6 +45,16 @@ def test_feed_keeps_description_and_author(monkeypatch):
     assert feed_summary({"summary": "<b>Kept</b>"}) == "Kept"
 
 
+def test_boardwalk_record_skips_a_nondefault_port():
+    assert boardwalk_record({
+        "title": "Hello",
+        "url": "https://example.com:8443/story",
+        "when": "2026-09-25T14:00:00+00:00",
+        "source": "Example",
+        "partner": False,
+    }) is None
+
+
 def test_duplicate_keeps_summary_from_the_other_copy():
     current = {
         "title": "Same story",

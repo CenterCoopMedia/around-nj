@@ -462,6 +462,9 @@ def combine_duplicate(current: dict, story: dict) -> dict:
 
 
 def boardwalk_record(story: dict) -> dict | None:
+    parsed = urlparse(story.get("url") or "")
+    if parsed.port and parsed.port not in {80, 443}:
+        return None
     canonical = canonical_url(story.get("url") or "")
     headline = plain_text(story.get("title"), 250)
     outlet = plain_text(story.get("source"), 120)
