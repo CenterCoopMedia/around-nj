@@ -14,6 +14,7 @@ import urllib.request
 from pathlib import Path
 
 BATCH_SIZE = 40
+MAX_RUN_BATCHES = 40
 MAX_BODY_BYTES = 64 * 1024
 DEFAULT_URL = "https://cms-api.njpbs.org/cmsImportAroundNj"
 TOKEN_RE = re.compile(r"^[A-Za-z0-9]{48}$")
@@ -42,6 +43,7 @@ def run_id_for(generated_at: str) -> str:
 
 
 def record_ok(story: object) -> bool:
+    # Character limits are Unicode code points, the same count the import uses.
     if not isinstance(story, dict):
         return False
     for key in REQUIRED_FIELDS:
@@ -125,6 +127,12 @@ def push_stories(
     if batches is None:
         print(
             "Around NJ Boardwalk push failed: a story exceeds the import size",
+            file=sys.stderr,
+        )
+        return 1
+    if len(batches) > MAX_RUN_BATCHES:
+        print(
+            "Around NJ Boardwalk push failed: the run has too many batches",
             file=sys.stderr,
         )
         return 1

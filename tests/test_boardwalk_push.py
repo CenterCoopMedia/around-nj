@@ -312,6 +312,36 @@ def test_push_refuses_one_story_over_the_byte_limit():
     )
 
 
+def test_push_refuses_a_run_with_more_than_40_batches():
+    stories = []
+    for index in range(41):
+        stories.append(
+            {
+                "url": f"https://example.com/{index}",
+                "canonicalUrl": f"https://example.com/{index}",
+                "headline": f"Story {index}",
+                "outlet": "Example",
+                "partner": True,
+                "publishedAt": "2026-09-25T14:00:00+00:00",
+                "pad": "x" * 60000,
+            }
+        )
+
+    def opener(_request, _timeout):
+        raise AssertionError("posted")
+
+    assert (
+        push_stories(
+            "https://cms.test/cmsImportAroundNj",
+            "a" * 48,
+            {"generatedAt": "2026-09-25T15:00:00+00:00", "stories": stories},
+            opener=opener,
+            sleep=lambda _seconds: None,
+        )
+        == 1
+    )
+
+
 def test_refresh_script_reads_pass_without_printing_it():
     script = (
         Path(__file__).parents[1] / "scripts" / "run_around_nj_refresh.sh"
