@@ -111,6 +111,30 @@ def test_duplicate_does_not_keep_metadata_from_a_rejected_port():
     assert boardwalk_record(merged)["canonicalUrl"] == "https://example.com/a"
 
 
+def test_duplicate_ignores_an_older_rejected_port():
+    older = {
+        "title": "Other origin",
+        "url": "https://example.com:8443/a",
+        "when": "2026-09-18T15:00:00+00:00",
+        "source": "Elsewhere",
+        "partner": True,
+        "summary": "Do not keep",
+    }
+    newer = {
+        "title": "Real headline",
+        "url": "https://example.com/a",
+        "when": "2026-09-18T16:00:00+00:00",
+        "source": "Example",
+        "partner": False,
+    }
+    merged = combine_duplicate(older, newer)
+    assert merged["url"] == "https://example.com/a"
+    assert merged["title"] == "Real headline"
+    assert merged["source"] == "Example"
+    assert merged["partner"] is False
+    assert "summary" not in merged
+
+
 def test_duplicate_keeps_summary_from_the_other_copy():
     current = {
         "title": "Same story",

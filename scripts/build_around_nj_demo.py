@@ -440,6 +440,14 @@ def story_li(story: dict, partner: bool) -> str:
 
 
 def combine_duplicate(current: dict, story: dict) -> dict:
+    current_url = current.get("url") or ""
+    story_url = story.get("url") or ""
+    current_exportable = exportable_story_url(current_url)
+    story_exportable = exportable_story_url(story_url)
+    if current_exportable and not story_exportable and not boardwalk_port_ok(story_url):
+        return dict(current)
+    if story_exportable and not current_exportable and not boardwalk_port_ok(current_url):
+        return dict(story)
     merged_partner = bool(current.get("partner")) or bool(story.get("partner"))
     newer = (story.get("when") or "") > (current.get("when") or "")
     keep = dict(story if newer else current)
