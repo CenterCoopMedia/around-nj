@@ -51,14 +51,22 @@ def record_ok(story: object) -> bool:
             return False
     if not isinstance(story.get("partner"), bool):
         return False
-    for key, limit in FIELD_LIMITS.items():
+    for key in ("url", "canonicalUrl", "headline", "outlet", "publishedAt"):
+        value = story.get(key)
+        limit = FIELD_LIMITS.get(key)
+        if (
+            not isinstance(value, str)
+            or not value
+            or (limit is not None and len(value) > limit)
+        ):
+            return False
+    for key in ("byline", "summary", "county"):
         value = story.get(key)
         if value is None:
             continue
-        if not isinstance(value, str) or not value or len(value) > limit:
+        if not isinstance(value, str) or not value or len(value) > FIELD_LIMITS[key]:
             return False
-    published_at = story.get("publishedAt")
-    return isinstance(published_at, str) and bool(published_at)
+    return True
 
 
 def story_batches(
@@ -103,7 +111,11 @@ def post_json(
         with opener(request, timeout=60) as response:
             return response.status, response.read(4096)
     except urllib.error.HTTPError as exc:
-        return exc.code, exc.read(4096)
+        try:
+            body = exc.read(4096)
+        except OSError as read_error:
+            body = str(read_error)[:180].encode("utf-8", errors="replace")
+        return exc.code, body
     except OSError as exc:
         return 0, str(exc)[:180].encode("utf-8", errors="replace")
 

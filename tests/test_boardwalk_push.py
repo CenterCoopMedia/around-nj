@@ -270,6 +270,84 @@ def test_push_splits_batches_that_would_exceed_64_kib():
         assert len(json.dumps(body).encode("utf-8")) <= 64 * 1024
 
 
+def test_push_retries_when_the_error_body_cannot_be_read():
+    calls = {"count": 0}
+
+    class Response:
+        status = 200
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def read(self, _limit):
+            return b'{"upserted":1}'
+
+    def opener(request, timeout):
+        calls["count"] += 1
+        if calls["count"] == 1:
+            error = urllib.error.HTTPError(
+                request.full_url, 503, "down", hdrs=None, fp=BytesIO(b"later")
+            )
+
+            def fail_read(_limit):
+                raise ConnectionResetError("reset")
+
+            error.read = fail_read
+            raise error
+        return Response()
+
+    assert (
+        push_stories(
+            "https://cms.test/cmsImportAroundNj",
+            "a" * 48,
+            {
+                "generatedAt": "2026-09-25T15:00:00+00:00",
+                "stories": [
+                    {
+                        "url": "https://example.com/a",
+                        "canonicalUrl": "https://example.com/a",
+                        "headline": "Hello",
+                        "outlet": "Example",
+                        "partner": True,
+                        "publishedAt": "2026-09-25T14:00:00+00:00",
+                    }
+                ],
+            },
+            opener=opener,
+            sleep=lambda _seconds: None,
+        )
+        == 0
+    )
+    assert calls["count"] == 2
+
+
+def test_push_rejects_a_null_required_field_before_posting():
+    def opener(_request, _timeout):
+        raise AssertionError("posted")
+
+    story = {
+        "url": None,
+        "canonicalUrl": "https://example.com/a",
+        "headline": "Hello",
+        "outlet": "Example",
+        "partner": True,
+        "publishedAt": "2026-09-25T14:00:00+00:00",
+    }
+    assert (
+        push_stories(
+            "https://cms.test/cmsImportAroundNj",
+            "a" * 48,
+            {"generatedAt": "2026-09-25T15:00:00+00:00", "stories": [story]},
+            opener=opener,
+            sleep=lambda _seconds: None,
+        )
+        == 1
+    )
+
+
 def test_push_retries_a_dropped_connection():
     calls = {"count": 0}
 
