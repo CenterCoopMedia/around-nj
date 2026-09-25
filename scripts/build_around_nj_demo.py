@@ -461,14 +461,40 @@ def combine_duplicate(current: dict, story: dict) -> dict:
     return keep
 
 
+def boardwalk_port_ok(url: str) -> bool:
+    """Match the Boardwalk import: only the scheme's own default port is allowed."""
+    try:
+        parsed = urlparse(url)
+        port = parsed.port
+        host = parsed.hostname or ""
+    except ValueError:
+        return False
+    if any(
+        character.isspace() or ord(character) < 32 or ord(character) == 127
+        for character in host
+    ):
+        return False
+    if parsed.scheme == "https":
+        return port is None or port == 443
+    if parsed.scheme == "http":
+        return port is None or port == 80
+    return False
+
+
 def boardwalk_record(story: dict) -> dict | None:
-    parsed = urlparse(story.get("url") or "")
-    if parsed.port and parsed.port not in {80, 443}:
+    url = story.get("url") or ""
+    if len(url) > 2000 or not boardwalk_port_ok(url):
         return None
-    canonical = canonical_url(story.get("url") or "")
+    canonical = canonical_url(url)
     headline = plain_text(story.get("title"), 250)
     outlet = plain_text(story.get("source"), 120)
-    if not canonical or not headline or not outlet or not story.get("when"):
+    if (
+        not canonical
+        or len(canonical) > 2000
+        or not headline
+        or not outlet
+        or not story.get("when")
+    ):
         return None
     record = {
         "url": story["url"],
@@ -479,7 +505,9 @@ def boardwalk_record(story: dict) -> dict | None:
         "publishedAt": story["when"],
     }
     for key in ("byline", "summary", "county"):
-        value = plain_text(story.get(key), {"byline": 120, "summary": 280, "county": 40}[key])
+        value = plain_text(
+            story.get(key), {"byline": 120, "summary": 280, "county": 40}[key]
+        )
         if value:
             record[key] = value
     return record
