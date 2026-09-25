@@ -194,6 +194,31 @@ def domain(url: str | None) -> str:
     return host
 
 
+def plain_text(value: str | None, limit: int) -> str | None:
+    if not value:
+        return None
+    text = re.sub(r"<[^>]+>", " ", str(value))
+    text = html.unescape(text)
+    text = re.sub(r"\s+", " ", text).strip().replace("<", "").replace(">", "")
+    text = text.strip()
+    if not text:
+        return None
+    return text[:limit].rstrip()
+
+
+def feed_byline(entry) -> str | None:
+    author = entry.get("author")
+    detail = entry.get("author_detail")
+    if not author and isinstance(detail, dict):
+        author = detail.get("name")
+    return plain_text(author, 120)
+
+
+def feed_summary(entry) -> str | None:
+    raw = entry.get("summary") or entry.get("description") or ""
+    return plain_text(raw, 280)
+
+
 def canonical_url(url: str) -> str:
     parsed = urlparse(url)
     host = domain(url)
@@ -301,15 +326,20 @@ def fetch_feed(url: str, source: str, partner: bool = False) -> dict:
             when = parse_when(entry)
             if when is None or when < cutoff or when > future_limit:
                 continue
-            items.append(
-                {
-                    "title": title,
-                    "url": link,
-                    "when": when.isoformat(),
-                    "source": source,
-                    "partner": partner,
-                }
-            )
+            item = {
+                "title": title,
+                "url": link,
+                "when": when.isoformat(),
+                "source": source,
+                "partner": partner,
+            }
+            byline = feed_byline(entry)
+            summary = feed_summary(entry)
+            if byline:
+                item["byline"] = byline
+            if summary:
+                item["summary"] = summary
+            items.append(item)
         result["ok"] = True
         result["items"] = items
         return result
@@ -424,7 +454,46 @@ def combine_duplicate(current: dict, story: dict) -> dict:
         keep["partner"] = True
     else:
         keep["partner"] = False
+    other = current if newer else story
+    for key in ("summary", "byline", "county"):
+        if not keep.get(key) and other.get(key):
+            keep[key] = other[key]
     return keep
+
+
+def boardwalk_record(story: dict) -> dict | None:
+    canonical = canonical_url(story.get("url") or "")
+    headline = plain_text(story.get("title"), 250)
+    outlet = plain_text(story.get("source"), 120)
+    if not canonical or not headline or not outlet or not story.get("when"):
+        return None
+    record = {
+        "url": story["url"],
+        "canonicalUrl": canonical,
+        "headline": headline,
+        "outlet": outlet,
+        "partner": bool(story.get("partner")),
+        "publishedAt": story["when"],
+    }
+    for key in ("byline", "summary", "county"):
+        value = plain_text(story.get(key), {"byline": 120, "summary": 280, "county": 40}[key])
+        if value:
+            record[key] = value
+    return record
+
+
+def write_boardwalk_stories(path: Path, stories: list[dict], generated_at: str) -> int:
+    records = []
+    for story in stories:
+        record = boardwalk_record(story)
+        if record is not None:
+            records.append(record)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(
+        json.dumps({"generatedAt": generated_at, "stories": records}, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    return len(records)
 
 
 def is_partner(story: dict, partner_names: set[str]) -> bool:
@@ -452,6 +521,10 @@ def main() -> None:
     parser.add_argument(
         "--scraped-json",
         help="Optional Firecrawl homepage scrape output to merge",
+    )
+    parser.add_argument(
+        "--stories-json",
+        help="Optional Boardwalk story export path",
     )
     args = parser.parse_args()
 
@@ -685,6 +758,13 @@ def main() -> None:
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(html_out, encoding="utf-8")
     print(f"wrote {out} partner={len(partner_stories)} other={len(other_stories)}")
+    if args.stories_json:
+        written = write_boardwalk_stories(
+            Path(args.stories_json),
+            unique,
+            datetime.now(timezone.utc).replace(microsecond=0).isoformat(),
+        )
+        print(f"wrote {args.stories_json} stories={written}")
 
 
 if __name__ == "__main__":

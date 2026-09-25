@@ -30,8 +30,11 @@ Rebuild:
 python scripts/scrape_partner_homepages.py --output drafts/scraped_headlines.json
 python scripts/build_around_nj_demo.py \
   --scraped-json drafts/scraped_headlines.json \
-  --output drafts/snapshot.html
+  --output drafts/snapshot.html \
+  --stories-json drafts/stories.json
 ```
+
+`drafts/stories.json` is the Boardwalk export: headline, outlet, optional byline and feed summary, date, partner flag, and canonical URL. The refresh reads pass entry `njpbs/boardwalk/around-nj-import` at run time and pushes that file. A missing pass entry skips the push and still writes the HTML snapshot.
 
 Officejawn timer `around-nj-refresh.timer` runs that at 6:30am and 2:00pm Eastern. Firecrawl covers invitation-list sites with no usable RSS. Facebook pages and outlets with no homepage are still skipped.
 
