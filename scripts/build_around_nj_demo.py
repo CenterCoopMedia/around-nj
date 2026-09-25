@@ -460,9 +460,15 @@ def combine_duplicate(current: dict, story: dict) -> dict:
             keep[key] = other[key]
     kept_url = keep.get("url") or ""
     other_url = other.get("url") or ""
-    if not exportable_story_url(kept_url) and exportable_story_url(other_url):
+    if exportable_story_url(kept_url) or not exportable_story_url(other_url):
+        return keep
+    # A rejected port is a different origin. Keep that copy's metadata off the
+    # valid link. An overlong tracking URL is the same origin, so only its URL
+    # is replaced.
+    if boardwalk_port_ok(kept_url) and boardwalk_port_ok(other_url):
         keep["url"] = other_url
-    return keep
+        return keep
+    return dict(other)
 
 
 def boardwalk_port_ok(url: str) -> bool:

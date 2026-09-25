@@ -91,6 +91,26 @@ def test_duplicate_keeps_a_valid_url_when_the_newer_copy_cannot_be_exported():
     assert boardwalk_record(merged)["canonicalUrl"] == "https://example.com/a"
 
 
+def test_duplicate_does_not_keep_metadata_from_a_rejected_port():
+    current = {
+        "title": "Real headline",
+        "url": "https://example.com/a",
+        "when": "2026-09-18T15:00:00+00:00",
+        "source": "Example",
+        "partner": False,
+    }
+    newer = {
+        "title": "Other origin",
+        "url": "https://example.com:8443/a",
+        "when": "2026-09-18T16:00:00+00:00",
+        "source": "Elsewhere",
+        "partner": True,
+    }
+    merged = combine_duplicate(current, newer)
+    assert merged == current
+    assert boardwalk_record(merged)["canonicalUrl"] == "https://example.com/a"
+
+
 def test_duplicate_keeps_summary_from_the_other_copy():
     current = {
         "title": "Same story",
