@@ -70,6 +70,27 @@ def test_boardwalk_record_skips_a_nondefault_port():
     assert kept["canonicalUrl"] == "https://example.com/story"
 
 
+def test_duplicate_keeps_a_valid_url_when_the_newer_copy_cannot_be_exported():
+    current = {
+        "title": "Same story",
+        "url": "https://example.com/a",
+        "when": "2026-09-18T15:00:00+00:00",
+        "source": "Example",
+        "partner": True,
+    }
+    newer = {
+        "title": "Same story",
+        "url": "https://example.com/a?utm_source=" + ("x" * 2000),
+        "when": "2026-09-18T16:00:00+00:00",
+        "source": "Example",
+        "partner": True,
+    }
+    merged = combine_duplicate(current, newer)
+    assert merged["url"] == "https://example.com/a"
+    assert merged["when"] == "2026-09-18T16:00:00+00:00"
+    assert boardwalk_record(merged)["canonicalUrl"] == "https://example.com/a"
+
+
 def test_duplicate_keeps_summary_from_the_other_copy():
     current = {
         "title": "Same story",

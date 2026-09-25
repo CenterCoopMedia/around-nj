@@ -458,6 +458,10 @@ def combine_duplicate(current: dict, story: dict) -> dict:
     for key in ("summary", "byline", "county"):
         if not keep.get(key) and other.get(key):
             keep[key] = other[key]
+    kept_url = keep.get("url") or ""
+    other_url = other.get("url") or ""
+    if not exportable_story_url(kept_url) and exportable_story_url(other_url):
+        keep["url"] = other_url
     return keep
 
 
@@ -483,9 +487,19 @@ def boardwalk_port_ok(url: str) -> bool:
     return False
 
 
+def exportable_story_url(url: str) -> bool:
+    if not isinstance(url, str) or len(url) > 2000 or not boardwalk_port_ok(url):
+        return False
+    try:
+        canonical = canonical_url(url)
+    except ValueError:
+        return False
+    return bool(canonical) and len(canonical) <= 2000
+
+
 def boardwalk_record(story: dict) -> dict | None:
     url = story.get("url") or ""
-    if len(url) > 2000 or not boardwalk_port_ok(url):
+    if not exportable_story_url(url):
         return None
     canonical = canonical_url(url)
     headline = plain_text(story.get("title"), 250)
