@@ -215,6 +215,16 @@ def test_push_redacts_the_token_from_an_error(capsys):
     assert "[redacted]" in error
 
 
+def test_push_fails_when_a_configured_token_is_only_spaces(
+    tmp_path, monkeypatch, capsys
+):
+    path = tmp_path / "stories.json"
+    path.write_text("{}", encoding="utf-8")
+    monkeypatch.setenv("AROUND_NJ_IMPORT_TOKEN", "   ")
+    assert push_main(["--stories", str(path)]) == 1
+    assert "not 48" in capsys.readouterr().err
+
+
 def test_push_fails_when_the_export_or_token_is_unusable(tmp_path, monkeypatch, capsys):
     path = tmp_path / "stories.json"
     path.write_text("{}", encoding="utf-8")

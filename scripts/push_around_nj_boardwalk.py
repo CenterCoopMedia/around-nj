@@ -165,12 +165,13 @@ def main(argv: list[str] | None = None) -> int:
         "--url", default=os.environ.get("AROUND_NJ_BOARDWALK_URL", DEFAULT_URL)
     )
     args = parser.parse_args(argv)
-    token = os.environ.get("AROUND_NJ_IMPORT_TOKEN", "").strip()
-    if not token:
+    raw_token = os.environ.get("AROUND_NJ_IMPORT_TOKEN")
+    if raw_token is None:
         print(
             "Around NJ Boardwalk push skipped: import token is not set", file=sys.stderr
         )
         return 0
+    token = raw_token.strip()
     if TOKEN_RE.fullmatch(token) is None:
         print(
             "Around NJ Boardwalk push failed: import token is not 48 letters or digits",
