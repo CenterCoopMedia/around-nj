@@ -23,18 +23,39 @@ fi
 git -C "$PAGES" fetch origin refs/heads/gh-pages:refs/remotes/origin/gh-pages
 git -C "$PAGES" merge --ff-only origin/gh-pages
 
-dest="$PAGES/snapshot.html"
-if [ -e "$dest" ] && [ ! -f "$dest" ] && [ ! -L "$dest" ]; then
-  echo "refusing to replace non-file $dest" >&2
+# Validate the whole bundle before replacing any output. index.html stays untouched.
+SOURCE_DIR="$(dirname "$SNAPSHOT")"
+FILES=(snapshot.html snapshot.json snapshot.md rss.xml)
+for name in "${FILES[@]}"; do
+  source="$SOURCE_DIR/$name"
+  [ "$name" != snapshot.html ] || source="$SNAPSHOT"
+  if [ ! -f "$source" ]; then
+    echo "missing snapshot bundle file $source; rebuild before publishing" >&2
+    exit 1
+  fi
+  dest="$PAGES/$name"
+  if [ -e "$dest" ] && [ ! -f "$dest" ] && [ ! -L "$dest" ]; then
+    echo "refusing to replace non-file $dest" >&2
+    exit 1
+  fi
+done
+# Never include an operator's unrelated staged edits in the refresh commit.
+if ! git -C "$PAGES" diff --cached --quiet; then
+  echo "refusing to publish with staged changes in $PAGES" >&2
   exit 1
 fi
-tmp="$(mktemp "$PAGES/snapshot.html.tmp.XXXXXX")"
-cp "$SNAPSHOT" "$tmp"
-if [ -L "$dest" ]; then
-  rm -f "$dest"
-fi
-mv -f "$tmp" "$dest"
-git -C "$PAGES" add snapshot.html
+for name in "${FILES[@]}"; do
+  source="$SOURCE_DIR/$name"
+  [ "$name" != snapshot.html ] || source="$SNAPSHOT"
+  dest="$PAGES/$name"
+  tmp="$(mktemp "$PAGES/$name.tmp.XXXXXX")"
+  cp "$source" "$tmp"
+  if [ -L "$dest" ]; then
+    rm -f "$dest"
+  fi
+  mv -f "$tmp" "$dest"
+done
+git -C "$PAGES" add -- "${FILES[@]}"
 if git -C "$PAGES" diff --cached --quiet; then
   echo "no snapshot changes"
   exit 0

@@ -26,6 +26,7 @@ import feedparser
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from rss_fetcher import is_generic_broadcast  # noqa: E402
+from snapshot_exports import clean_text, make_snapshot, write_exports  # noqa: E402
 
 LOOKBACK_HOURS = 72
 TIMEOUT = 10
@@ -209,6 +210,10 @@ def canonical_url(url: str) -> str:
 
 
 def valid_story_link(link: str) -> str | None:
+    if clean_text(link) != link or any(
+        c.isspace() or ord(c) < 32 or 127 <= ord(c) <= 159 for c in link
+    ):
+        return None
     try:
         parsed = urlparse(link)
     except ValueError:
@@ -258,21 +263,27 @@ def parse_published_text(raw: str) -> datetime | None:
     return None
 
 
-def parse_when(entry) -> datetime | None:
+def parse_when_with_kind(entry) -> tuple[datetime | None, str | None]:
     for key in ("published", "updated"):
         raw = entry.get(key)
         if isinstance(raw, str):
             parsed = parse_published_text(raw)
             if parsed is not None:
-                return parsed
+                return parsed, key
     for key in ("published_parsed", "updated_parsed"):
         parsed = entry.get(key)
         if parsed:
             try:
-                return datetime(*parsed[:6], tzinfo=timezone.utc)
+                return datetime(*parsed[:6], tzinfo=timezone.utc), key.removesuffix(
+                    "_parsed"
+                )
             except Exception:
                 pass
-    return None
+    return None, None
+
+
+def parse_when(entry) -> datetime | None:
+    return parse_when_with_kind(entry)[0]
 
 
 def fetch_feed(url: str, source: str, partner: bool = False) -> dict:
@@ -298,7 +309,7 @@ def fetch_feed(url: str, source: str, partner: bool = False) -> dict:
             link = urljoin(url, link)
             if valid_story_link(link) is None:
                 continue
-            when = parse_when(entry)
+            when, date_kind = parse_when_with_kind(entry)
             if when is None or when < cutoff or when > future_limit:
                 continue
             items.append(
@@ -308,6 +319,7 @@ def fetch_feed(url: str, source: str, partner: bool = False) -> dict:
                     "when": when.isoformat(),
                     "source": source,
                     "partner": partner,
+                    "date_kind": date_kind,
                 }
             )
         result["ok"] = True
@@ -411,7 +423,19 @@ def story_li(story: dict, partner: bool) -> str:
 
 def combine_duplicate(current: dict, story: dict) -> dict:
     merged_partner = bool(current.get("partner")) or bool(story.get("partner"))
-    newer = (story.get("when") or "") > (current.get("when") or "")
+    newer = (
+        story.get("when") or "",
+        story["source"],
+        story["title"],
+        story["url"],
+        story.get("date_kind", ""),
+    ) > (
+        current.get("when") or "",
+        current["source"],
+        current["title"],
+        current["url"],
+        current.get("date_kind", ""),
+    )
     keep = dict(story if newer else current)
     if merged_partner:
         if story.get("partner") and not current.get("partner"):
@@ -563,6 +587,7 @@ def main() -> None:
                     dropped += 1
                     continue
                 when = parse_when({"published": item.get("published")})
+                date_kind = "published" if when is not None else "observed"
                 if when is None:
                     when = scraped_at
                 if when < cutoff or when > future_limit:
@@ -575,6 +600,7 @@ def main() -> None:
                         "when": when.isoformat(),
                         "source": str(item.get("source") or org),
                         "partner": True,
+                        "date_kind": date_kind,
                     }
                 )
                 merged += 1
@@ -604,7 +630,17 @@ def main() -> None:
     partner_names = {p["org"] for p in partners if p.get("org")}
 
     by_key: dict[str, dict] = {}
-    for story in stories:
+    for story in sorted(
+        stories,
+        key=lambda s: (
+            s["when"],
+            s["source"],
+            s["title"],
+            s["url"],
+            s.get("date_kind", ""),
+            bool(s.get("partner")),
+        ),
+    ):
         key = canonical_url(story["url"])
         current = by_key.get(key)
         if current is None:
@@ -613,7 +649,9 @@ def main() -> None:
         by_key[key] = combine_duplicate(current, story)
     unique = []
     for story in sorted(
-        by_key.values(), key=lambda s: s.get("when") or "", reverse=True
+        by_key.values(),
+        key=lambda s: (s.get("when") or "", canonical_url(s["url"])),
+        reverse=True,
     ):
         story["partner"] = bool(story.get("partner")) or is_partner(
             story, partner_names
@@ -625,7 +663,8 @@ def main() -> None:
     shown_partners = partner_stories[:MAX_LIST]
     shown_other = other_stories[:MAX_LIST]
     working_partners = [p for p in partners if p.get("rss") in ok_urls]
-    now = fmt_now(datetime.now().astimezone())
+    generated_at = datetime.now(timezone.utc)
+    now = fmt_now(generated_at)
     tapinto_jobs = [url for url, _, _ in jobs if "tapinto.net" in url]
     tapinto_stories = [s for s in unique if "tapinto.net" in (s.get("url") or "")]
     tapinto_403 = [
@@ -683,6 +722,19 @@ def main() -> None:
     )
     out = Path(args.output)
     out.parent.mkdir(parents=True, exist_ok=True)
+    snapshot = make_snapshot(
+        unique,
+        generated_at=generated_at,
+        lookback_hours=LOOKBACK_HOURS,
+        canonicalize=canonical_url,
+        coverage={
+            "rss_feeds_attempted": len(jobs),
+            "rss_feeds_failed": len(failures),
+            "unexpected_rss_failures": len(unexpected),
+            "includes_homepage_input": bool(args.scraped_json),
+        },
+    )
+    write_exports(out.parent, snapshot)
     out.write_text(html_out, encoding="utf-8")
     print(f"wrote {out} partner={len(partner_stories)} other={len(other_stories)}")
 

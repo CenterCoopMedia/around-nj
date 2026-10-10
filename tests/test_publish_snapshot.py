@@ -58,6 +58,9 @@ def _init_pages_remote(tmp_path: Path) -> tuple[Path, Path]:
     _git(pages, "remote", "add", "origin", str(remote))
     (pages / "index.html").write_text("desk\n", encoding="utf-8")
     (pages / "snapshot.html").write_text("old snapshot\n", encoding="utf-8")
+    for name in ("snapshot.json", "snapshot.md", "rss.xml"):
+        (pages / name).write_text("export\n", encoding="utf-8")
+        _git(pages, "add", name)
     _git(pages, "add", "index.html", "snapshot.html")
     _git(pages, "commit", "-m", "seed")
     _git(pages, "push", "-u", "origin", "gh-pages")
@@ -65,6 +68,8 @@ def _init_pages_remote(tmp_path: Path) -> tuple[Path, Path]:
 
 
 def _publish(tmp_path: Path, snapshot: Path, pages: Path | None = None):
+    for name in ("snapshot.json", "snapshot.md", "rss.xml"):
+        (snapshot.parent / name).write_text("export\n", encoding="utf-8")
     env = _script_env(tmp_path)
     if pages is not None:
         env["AROUND_NJ_PAGES"] = str(pages)
@@ -109,6 +114,8 @@ def test_fast_forwards_then_publishes_snapshot_only(tmp_path):
 
     assert result.returncode == 0, result.stderr
     assert _remote_file(remote, "snapshot.html") == "new snapshot\n"
+    for name in ("snapshot.json", "snapshot.md", "rss.xml"):
+        assert _remote_file(remote, name) == "export\n"
     assert _remote_file(remote, "index.html") == "desk\n"
     assert _remote_file(remote, "README.md") == "skip ci\n"
 
@@ -132,6 +139,8 @@ def test_replaces_snapshot_symlink_without_following_it(tmp_path):
     assert not (pages / "snapshot.html").is_symlink()
     assert (pages / "snapshot.html").read_text(encoding="utf-8") == "new snapshot\n"
     assert _remote_file(remote, "snapshot.html") == "new snapshot\n"
+    for name in ("snapshot.json", "snapshot.md", "rss.xml"):
+        assert _remote_file(remote, name) == "export\n"
 
 
 def test_no_snapshot_changes_exits_zero(tmp_path):
@@ -143,3 +152,26 @@ def test_no_snapshot_changes_exits_zero(tmp_path):
 
     assert result.returncode == 0, result.stderr
     assert "no snapshot changes" in result.stdout
+
+
+def test_missing_export_refuses_partial_publish(tmp_path):
+    remote, pages = _init_pages_remote(tmp_path)
+    snapshot = tmp_path / "new.html"
+    snapshot.write_text("new snapshot\n", encoding="utf-8")
+    result = _run([str(SCRIPT), str(snapshot)], check=False, env=_script_env(tmp_path))
+    assert result.returncode == 1
+    assert "missing snapshot bundle file" in result.stderr
+    assert _remote_file(remote, "snapshot.html") == "old snapshot\n"
+    assert (pages / "snapshot.html").read_text() == "old snapshot\n"
+
+
+def test_refuses_unrelated_staged_changes(tmp_path):
+    remote, pages = _init_pages_remote(tmp_path)
+    (pages / "unrelated.txt").write_text("not part of refresh")
+    _git(pages, "add", "unrelated.txt")
+    snapshot = tmp_path / "new.html"
+    snapshot.write_text("new snapshot\n", encoding="utf-8")
+    result = _publish(tmp_path, snapshot)
+    assert result.returncode == 1
+    assert "staged changes" in result.stderr
+    assert _remote_file(remote, "snapshot.html") == "old snapshot\n"

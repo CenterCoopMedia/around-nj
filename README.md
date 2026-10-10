@@ -39,6 +39,10 @@ Twice-daily publishes use `[skip ci]` and do not run Playwright. Pre-merge CI on
 
 See `docs/around-nj-demo.md`.
 
+## Reuse headlines in other tools
+
+The snapshot build also generates Markdown (`snapshot.md`), structured JSON (`snapshot.json`), and RSS (`rss.xml`) from the same collected stories, including publisher attribution and stable IDs. See [export formats and integration recipes](docs/exports.md). New endpoints become available after this change is merged and the refresh is published.
+
 ## Daily News Roundup newsletter
 
 The same `src/` pipeline still produces the Center for Cooperative Media Mailchimp newsletter (Monday through Thursday). That path is unchanged:
