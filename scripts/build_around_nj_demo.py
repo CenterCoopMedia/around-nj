@@ -43,8 +43,12 @@ TRACKING_QUERY = {
     "mc_eid",
 }
 UA = "CCM-AroundNJ/0.3 (+https://centerforcooperativemedia.org)"
+TAPINTO_UA = (
+    "Mozilla/5.0 (compatible; CCM-AroundNJ/0.3; +https://centerforcooperativemedia.org)"
+)
 MAX_LIST = 80
 MAX_REDIRECTS = 3
+TAPINTO_TOWNS_URL = "https://www.tapinto.net/api/v1/load_subscription_towns"
 
 
 def load_nj_tz():
@@ -146,7 +150,17 @@ def fetch_url_bytes(
     path = parsed.path or "/"
     if parsed.query:
         path += "?" + parsed.query
-    conn.request("GET", path, headers={"User-Agent": UA, "Host": parsed.hostname})
+    tapinto_api = parsed.hostname in {
+        "tapinto.net",
+        "www.tapinto.net",
+    } and parsed.path in {
+        "/articles.atom",
+        "/api/v1/load_subscription_towns",
+    }
+    user_agent = TAPINTO_UA if tapinto_api else UA
+    conn.request(
+        "GET", path, headers={"User-Agent": user_agent, "Host": parsed.hostname}
+    )
     sock.settimeout(remaining_timeout(deadline))
     response = conn.getresponse()
     try:
@@ -192,6 +206,100 @@ def domain(url: str | None) -> str:
     if host.startswith("www."):
         host = host[4:]
     return host
+
+
+def tapinto_town_sources(
+    feeds_cfg: dict, directory: dict | None = None
+) -> dict[str, str]:
+    """Map New Jersey town slugs to the names credited in the snapshot."""
+    sources = {}
+    for feeds in feeds_cfg.get("feeds", {}).values():
+        for feed in feeds:
+            url = feed.get("rss_url") or ""
+            if domain(url) != "tapinto.net":
+                continue
+            parts = urlparse(url).path.strip("/").split("/")
+            if len(parts) >= 2 and parts[0] == "towns":
+                sources[parts[1]] = feed["name"]
+    for town in (directory or {}).get("subscription_towns", []):
+        if not isinstance(town, dict):
+            continue
+        cluster_towns = town.get("cluster_towns")
+        if not isinstance(cluster_towns, list):
+            cluster_towns = []
+        for site in [town, *cluster_towns]:
+            if not isinstance(site, dict):
+                continue
+            if site.get("state") == "NJ" and site.get("slug") and site.get("name"):
+                sources.setdefault(site["slug"], f"TAPinto {site['name']}")
+    return sources
+
+
+def _tapinto_town_directory_worker(conn) -> None:
+    try:
+        status, body = fetch_url_bytes(TAPINTO_TOWNS_URL)
+        if status != 200:
+            raise ValueError(f"http {status}")
+        directory = json.loads(body)
+        if not isinstance(directory, dict) or not isinstance(
+            directory.get("subscription_towns"), list
+        ):
+            raise ValueError("missing town list")
+        conn.send({"directory": directory})
+    except Exception as exc:
+        conn.send({"error": type(exc).__name__})
+    finally:
+        conn.close()
+
+
+def load_tapinto_town_sources(feeds_cfg: dict) -> dict[str, str]:
+    """Use a bounded directory lookup; fall back to configured NJ towns."""
+    fallback = tapinto_town_sources(feeds_cfg)
+    ctx = multiprocessing.get_context("spawn")
+    parent, child = ctx.Pipe(duplex=False)
+    proc = ctx.Process(
+        target=_tapinto_town_directory_worker, args=(child,), daemon=True
+    )
+    try:
+        proc.start()
+        child.close()
+        if not parent.poll(timeout=DEADLINE_SECONDS + 2):
+            print("TAPinto town list unavailable: deadline")
+            return fallback
+        result = parent.recv()
+        proc.join(1)
+        if "error" in result:
+            print(f"TAPinto town list unavailable: {result['error']}")
+            return fallback
+        return tapinto_town_sources(feeds_cfg, result["directory"])
+    except Exception as exc:
+        print(f"TAPinto town list unavailable: {type(exc).__name__}")
+        return fallback
+    finally:
+        parent.close()
+        child.close()
+        if proc.pid is not None:
+            if proc.is_alive():
+                proc.terminate()
+            proc.join(1)
+
+
+def filter_tapinto_network_items(
+    items: list[dict], town_sources: dict[str, str]
+) -> list[dict]:
+    """Keep listed New Jersey towns and credit each town's TAPinto site."""
+    kept = []
+    for item in items:
+        url = item.get("url") or ""
+        if domain(url) != "tapinto.net":
+            continue
+        parts = urlparse(url).path.strip("/").split("/")
+        if len(parts) < 4 or parts[0] != "towns" or "articles" not in parts[2:]:
+            continue
+        source = town_sources.get(parts[1])
+        if source:
+            kept.append({**item, "source": source})
+    return kept
 
 
 def canonical_url(url: str) -> str:
@@ -458,6 +566,7 @@ def main() -> None:
     feeds_cfg = json.loads(
         (ROOT / "config" / "rss_feeds.json").read_text(encoding="utf-8")
     )
+    tapinto_towns = load_tapinto_town_sources(feeds_cfg)
     partners = json.loads(
         (ROOT / "config" / "pbs_partners.json").read_text(encoding="utf-8")
     )
@@ -536,6 +645,13 @@ def main() -> None:
                 continue
             if result["ok"]:
                 ok_urls.add(result["url"])
+                if (
+                    domain(url) == "tapinto.net"
+                    and urlparse(url).path == "/articles.atom"
+                ):
+                    result["items"] = filter_tapinto_network_items(
+                        result["items"], tapinto_towns
+                    )
                 stories.extend(result["items"])
             else:
                 failures.append(result)
@@ -641,7 +757,9 @@ def main() -> None:
     elif tapinto_jobs and len(tapinto_403) == len(tapinto_jobs):
         tapinto_note = "TAPinto RSS returned 403 in this build, so that network is not in this snapshot."
     elif tapinto_jobs:
-        tapinto_note = "TAPinto feeds did not yield headlines in this build."
+        tapinto_note = (
+            "TAPinto feeds did not yield eligible New Jersey headlines in this build."
+        )
     else:
         tapinto_note = "No TAPinto feeds were queued in this build."
 
