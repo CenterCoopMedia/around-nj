@@ -21,7 +21,7 @@ https://centercoopmedia.github.io/around-nj/
 
 - All stories / Partners only
 - 72-hour RSS snapshot, not a live all-day product
-- TAPinto town feeds currently return HTTP 403
+- Legacy TAPinto town `/rss` feeds return HTTP 403. The network Atom feed is filtered with TAPinto's New Jersey town directory.
 - Several USA Today network RSS URLs in `config/rss_feeds.json` currently return 404
 
 Rebuild:

@@ -85,7 +85,7 @@
     "invite": "TAPinto",
     "home": "https://www.tapinto.net",
     "kind": "news",
-    "rss": null,
+    "rss": "https://www.tapinto.net/articles.atom",
     "star_domain": "tapinto.net",
     "scrape": "https://www.tapinto.net"
   },

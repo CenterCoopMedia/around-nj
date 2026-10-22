@@ -19,13 +19,13 @@ It uses official NJ PBS marks: the white-and-blue horizontal logo on navy, PBS S
 
 - Snapshot, not a live all-day product.
 - No paywall login. No Mailchimp send.
-- TAPinto RSS returns HTTP 403 on the town feeds in `config/rss_feeds.json`.
+- Legacy TAPinto town `/rss` feeds return HTTP 403. The network Atom feed uses a TAPinto-specific, named browser-compatible user agent and keeps New Jersey towns from TAPinto's public town directory. Configured New Jersey towns in `config/rss_feeds.json` are the fallback when the directory is unavailable.
 - Several USA Today network feeds in that file return 404.
 - GitHub Pages is the `gh-pages` branch. Application code stays on `master`.
 
 ## Firecrawl fallbacks
 
-Some invitation-list outlets have no RSS, a JavaScript homepage, or a blocked feed (TAPinto 403). Those rows can set `"scrape": "https://..."`. The refresh job uses Firecrawl to extract recent headlines from the homepage and merges them into the snapshot.
+Some invitation-list outlets have no RSS, a JavaScript homepage, or a blocked feed. Those rows can set `"scrape": "https://..."`. The refresh job uses Firecrawl to extract recent headlines from the homepage and merges them into the snapshot.
 
 Skip Facebook pages, scanners, and outlets with no public homepage for now. Firecrawl is authenticated on officejawn via `FIRECRAWL_API_KEY` / `pass claude/api/firecrawl`.
 
