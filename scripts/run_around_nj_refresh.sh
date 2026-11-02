@@ -34,6 +34,10 @@ set +e
 "$PYTHON" "${ROOT}/scripts/scrape_partner_homepages.py" --output "$SCRAPED"
 scrape_status=$?
 set -e
+scrape_context=""
+if [ "$scrape_status" -ne 0 ]; then
+  scrape_context=" Partner scrape also failed (exit $scrape_status); partners without RSS are missing."
+fi
 BUILD_ARGS=(--output "$SNAPSHOT")
 if [ "$scrape_status" -eq 0 ] && [ -f "$SCRAPED" ]; then
   BUILD_ARGS+=(--scraped-json "$SCRAPED")
@@ -44,12 +48,11 @@ set +e
 build_status=$?
 set -e
 if [ "$build_status" -ne 0 ]; then
-  notify "Around New Jersey snapshot build failed on officejawn (exit $build_status)."
+  notify "Around New Jersey snapshot build failed on officejawn (exit $build_status).$scrape_context"
   exit "$build_status"
 fi
 if [ "$scrape_status" -ne 0 ]; then
   echo "scrape failed ($scrape_status); RSS snapshot still built" >&2
-  notify "Around New Jersey scrape failed (exit $scrape_status). RSS snapshot still built."
 fi
 
 if [ "${AROUND_NJ_PUBLISH:-0}" = "1" ]; then
@@ -58,7 +61,13 @@ if [ "${AROUND_NJ_PUBLISH:-0}" = "1" ]; then
   publish_status=$?
   set -e
   if [ "$publish_status" -ne 0 ]; then
-    notify "Around New Jersey snapshot publish failed (exit $publish_status)."
+    notify "Around New Jersey snapshot publish failed (exit $publish_status).$scrape_context"
     exit "$publish_status"
   fi
+fi
+
+# A total scrape failure drops partners without RSS feeds and needs repair.
+# Wait for later stages so a build/publish failure is the single alert this run.
+if [ "$scrape_status" -ne 0 ]; then
+  notify "Around New Jersey partner scrape failed (exit $scrape_status). RSS snapshot still built. Check scraper configuration and source failures; partners without RSS are missing."
 fi
